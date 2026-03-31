@@ -17,16 +17,6 @@ public class TaskController {
 
     }
 
-    @GetMapping
-    public List<Task> getAllTasks(){
-        return taskRepository.findAll();
-    }
-
-    @PostMapping
-    public Task createTask(@RequestBody Task task){
-        return taskRepository.save(task);
-    }
-
     @DeleteMapping("/{id}")
     public void deleteTask(@PathVariable Long id){
         taskRepository.deleteById(id);
@@ -39,4 +29,12 @@ public class TaskController {
         task.setCompleted(updatedTask.isCompleted());
         return taskRepository.save(task);
     }
+
+    @PatchMapping("/{id}/complete")
+    public Task taskCompleted(@PathVariable Long id){
+        Task task = taskRepository.findById(id).orElseThrow();
+        task.setCompleted(true);
+        return taskRepository.save(task);
+    }
+
 }

@@ -1,18 +1,32 @@
 package com.example.taskmanager.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.example.taskmanager.Priority;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Entity
+@Table(name = "tasks")
 public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
+    private LocalDate dueDate;
     private boolean completed;
+
+    //Tell JPA to read Enums as String
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
+
+    @JsonBackReference // Αυτό λέει "μην ξαναδείξεις τον user εδώ, θα κολλήσουμε σε λούπα"
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public Task(){
     }
@@ -41,4 +55,29 @@ public class Task {
     public void setCompleted(boolean completed) {
         this.completed = completed;
     }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
+    }
+
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
 }
+
