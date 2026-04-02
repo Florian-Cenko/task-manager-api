@@ -1,5 +1,6 @@
 package com.example.taskmanager.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
@@ -16,9 +17,9 @@ public class User {
     private String username;
     private String email;
 
-    @JsonManagedReference // Αυτό λέει "εγώ είμαι ο γονιός, δείξε τα παιδιά μου"
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Task> tasks = new ArrayList<>(); // Πρόσθεσε το = new ArrayList<>()
+    @JsonIgnoreProperties("user") // ΠΡΟΣΘΕΣΕ ΑΥΤΟ!
+    private List<Task> tasks;
 
     public User(){
     }

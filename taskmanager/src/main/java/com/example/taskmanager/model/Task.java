@@ -3,6 +3,7 @@ package com.example.taskmanager.model;
 import com.example.taskmanager.Priority;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -23,10 +24,15 @@ public class Task {
     @Enumerated(EnumType.STRING)
     private Priority priority;
 
-    @JsonBackReference // Αυτό λέει "μην ξαναδείξεις τον user εδώ, θα κολλήσουμε σε λούπα"
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties("tasks")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    @JsonIgnoreProperties("tasksList")
+    private Category category;
 
     public Task(){
     }
@@ -78,6 +84,14 @@ public class Task {
 
     public void setPriority(Priority priority) {
         this.priority = priority;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 }
 
