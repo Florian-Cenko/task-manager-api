@@ -1,5 +1,6 @@
 package com.example.taskmanager.controller;
 
+import com.example.taskmanager.dto.TaskResponseDTO;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.repository.CategoryRepository;
 import com.example.taskmanager.repository.TaskRepository;
@@ -12,15 +13,19 @@ import java.util.List;
 @RequestMapping("/api/tasks")
 public class TaskController {
 
-    private final TaskRepository taskRepository;
-    private final CategoryRepository categoryRepository;
     private final TaskService taskService;
 
-    public TaskController(TaskRepository taskRepository, TaskService taskService,CategoryRepository categoryRepository) {
-        this.taskRepository = taskRepository;
+    public TaskController(TaskService taskService) {
         this.taskService = taskService;
-        this.categoryRepository = categoryRepository;
 
+    }
+
+    @PostMapping("/add")
+    public TaskResponseDTO createTask(@RequestParam Long userId,
+                                      @RequestParam Long categoryId,
+                                      @RequestBody Task task) {
+
+        return taskService.createTask(userId, categoryId, task);
     }
 
     @DeleteMapping("/{id}")
@@ -29,22 +34,27 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public Task taskUpdated(@PathVariable Long id, @RequestBody Task updatedTask) {
+    public TaskResponseDTO taskUpdated(@PathVariable Long id, @RequestBody Task updatedTask) {
         return taskService.updateTask(id, updatedTask);
     }
 
     @PatchMapping("/{id}/complete")
-    public Task completeTask(@PathVariable Long id) {
+    public TaskResponseDTO completeTask(@PathVariable Long id) {
         return taskService.taskCompleted(id);
     }
 
     @GetMapping("/category/{categoryId}")
-    public List<Task> tasksOfCategory(@PathVariable Long categoryId){
+    public List<TaskResponseDTO> tasksOfCategory(@PathVariable Long categoryId) {
         return taskService.allTasksForCategory(categoryId);
     }
 
     @GetMapping()
-    public List<Task> getAllTasks(){
+    public List<TaskResponseDTO> getAllTasks() {
         return taskService.getAllTasks();
+    }
+
+    @GetMapping("/{userId}/stats")
+    public String getUserStats(@PathVariable Long userId) {
+        return taskService.getUserStats(userId);
     }
 }

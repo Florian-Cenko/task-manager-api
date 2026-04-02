@@ -1,6 +1,7 @@
 package com.example.taskmanager.service;
 
 import com.example.taskmanager.Priority;
+import com.example.taskmanager.dto.TaskResponseDTO;
 import com.example.taskmanager.model.Category;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.model.User;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,38 +26,52 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final CategoryRepository categoryRepository;
 
-    public TaskService(UserRepository userRepository,TaskRepository taskRepository,CategoryRepository categoryRepository){
+    public TaskService(UserRepository userRepository, TaskRepository taskRepository, CategoryRepository categoryRepository) {
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.categoryRepository = categoryRepository;
     }
 
-    public Task addTaskToUser(Long userId, Task task){
+    public TaskResponseDTO createTask(Long userId, Long categoryId, Task task) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new RuntimeException("Category with this id" + categoryId + "does not exist"));
+
         task.setId(null);
         task.setUser(user);
-        return taskRepository.save(task);
-    }
-
-    public Task addTaskToCategory(Long categoryId,Task task){
-        Category category = categoryRepository.findById(categoryId).orElseThrow(()->new RuntimeException("Category with this id"+categoryId+"does not exist"));
-        task.setId(null);
         task.setCategory(category);
-        return taskRepository.save(task);
+        Task savedTask = taskRepository.save(task);
+        return convertTaskToDTO(savedTask);
     }
 
-    public List<Task> getHighPriorityTasksForUser(Long userId, Priority priority){
-        return taskRepository.findByUserIdAndPriority(userId,priority);
+    public List<TaskResponseDTO> getHighPriorityTasksForUser(Long userId, Priority priority) {
+
+        List<Task> tasks = taskRepository.findByUserIdAndPriority(userId, priority);
+
+        // 2. Τη μετατρέπουμε σε λίστα από DTOs SOSSSSS
+        return tasks.stream()
+                .map(this::convertTaskToDTO) // Μετατρέπει κάθε Task σε TaskResponseDTO
+                .toList();// Την ξανακάνει λίστα
     }
 
-    public Task taskCompleted(Long id){
+    public List<TaskResponseDTO> getDeadlineTasksIsNotCompleted(Long userId) {
+        LocalDate today = LocalDate.now();
+        List<Task> tasks = taskRepository.findByUserIdAndDueDateAndCompletedFalse(userId, today);
+        // 2. Τη μετατρέπουμε σε λίστα από DTOs SOSSSSS
+        return tasks.stream()
+                .map(this::convertTaskToDTO) // Μετατρέπει κάθε Task σε TaskResponseDTO
+                .toList();// Την ξανακάνει λίστα
+    }
+
+    public TaskResponseDTO taskCompleted(Long id) {
         Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task doesn't exist"));
         task.setCompleted(true);
-        return taskRepository.save(task);
+        Task savedTask = taskRepository.save(task);
+        return convertTaskToDTO(savedTask);
     }
 
-    public Task updateTask(Long id, Task updTask) {
+    public TaskResponseDTO updateTask(Long id, Task updTask) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task doesn't exist"));
 
@@ -64,26 +80,62 @@ public class TaskService {
         task.setPriority(updTask.getPriority()); // Πρόσθεσε αυτό
         task.setDueDate(updTask.getDueDate());   // Και αυτό
 
-        return taskRepository.save(task);
+        Task savedTask = taskRepository.save(task);
+        return convertTaskToDTO(savedTask);
     }
 
-    public void deleteTask(Long id){
+    public void deleteTask(Long id) {
         boolean exists = taskRepository.existsById(id);
-        if (!exists){
-            throw new RuntimeException("Task with this id" +id + "does not exist");
+        if (!exists) {
+            throw new RuntimeException("Task with this id" + id + "does not exist");
         }
-            taskRepository.deleteById(id);
+        taskRepository.deleteById(id);
     }
 
-    public List<Task> allTasksForCategory(Long categoryId){
+    public List<TaskResponseDTO> allTasksForCategory(Long categoryId) {
         boolean categoryExists = categoryRepository.existsById(categoryId);
-        if(!categoryExists){
-            throw new RuntimeException("Category with id"+categoryId+"does not exist");
+
+        if (!categoryExists) {
+            throw new RuntimeException("Category with id" + categoryId + "does not exist");
         }
-        return taskRepository.findByCategoryId(categoryId);
+        List<Task> tasks = taskRepository.findByCategoryId(categoryId);
+
+        return tasks.stream()
+                .map(this::convertTaskToDTO)
+                .toList();
     }
 
-    public List<Task> getAllTasks(){
-        return taskRepository.findAll();
+    public List<TaskResponseDTO> getAllTasks() {
+
+        List<Task> tasks = taskRepository.findAll();
+        return tasks.stream()
+                .map(this::convertTaskToDTO)
+                .toList();
+    }
+
+    public String getUserStats(Long userId) {
+        long total = taskRepository.countByUserId(userId);
+        long completedTasks = taskRepository.countByUserIdAndCompletedTrue(userId);
+        long notCompletedTasks = taskRepository.countByUserIdAndCompletedFalse(userId);
+
+        if (total == 0) {
+            return "No tasks found for this User";
+        }
+        double percentage = ((double) completedTasks / total) * 100;
+        return String.format("Stats for User %d: Total: %d | Completed: %d | Pending: %d | Progress: %.2f%%",
+                userId, total, completedTasks, notCompletedTasks, percentage);
+    }
+
+    private TaskResponseDTO convertTaskToDTO(Task task){
+        TaskResponseDTO dto = new TaskResponseDTO();
+        dto.setId(task.getId());
+        dto.setTitle(task.getTitle());
+        dto.setCompleted(task.isCompleted());
+        dto.setPriority(task.getPriority());
+        dto.setDueDate(task.getDueDate());
+        dto.setUsername(task.getUser().getUsername());
+        dto.setEmail(task.getUser().getEmail());
+        dto.setCategoryName(task.getCategory().getName());
+        return dto;
     }
 }

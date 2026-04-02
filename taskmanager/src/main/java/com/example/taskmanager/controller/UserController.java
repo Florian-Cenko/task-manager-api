@@ -1,42 +1,45 @@
 package com.example.taskmanager.controller;
 import com.example.taskmanager.Priority;
+import com.example.taskmanager.dto.TaskResponseDTO;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.model.User;
-import com.example.taskmanager.repository.TaskRepository;
-import com.example.taskmanager.repository.UserRepository;
 import com.example.taskmanager.service.TaskService;
+import com.example.taskmanager.service.UserService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
     private final TaskService taskService;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public UserController(TaskService taskService,UserRepository userRepository){
+    public UserController(TaskService taskService,UserService userService){
         this.taskService = taskService;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @PostMapping()
     public User createUser(@RequestBody User user){
-        return userRepository.save(user);
+        return userService.createUser(user);
     }
 
     @GetMapping("/{userId}")
-    public User getUser(@PathVariable Long userId){
-        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User doesn't exist"));
+    public User getUserFromId(@PathVariable Long userId){
+        return userService.getUser(userId);
     }
+
     @GetMapping("/{userId}/tasks/filter")
-    public List<Task> getHighPriorityTasksForUser(@PathVariable Long userId, @RequestParam Priority priority){
+    public List<TaskResponseDTO> getHighPriorityTasksForUser(@PathVariable Long userId, @RequestParam Priority priority){
         return taskService.getHighPriorityTasksForUser(userId,priority);
     }
 
-    @PostMapping("/{userId}/tasks")
-    public Task addTaskToUser(@PathVariable Long userId,@RequestBody Task task){
-       return taskService.addTaskToUser(userId,task);
+    @GetMapping("/{userId}/tasks/deadline/today")
+    public List<TaskResponseDTO> getDeadlineTasksIsNotCompleted(@PathVariable Long userId){
+        return taskService.getDeadlineTasksIsNotCompleted(userId);
     }
 
 }
