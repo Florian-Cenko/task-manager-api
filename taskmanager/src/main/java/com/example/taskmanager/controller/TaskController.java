@@ -57,4 +57,9 @@ public class TaskController {
     public String getUserStats(@PathVariable Long userId) {
         return taskService.getUserStats(userId);
     }
+
+    @GetMapping("/{userId}/labels")
+    public List<TaskResponseDTO> getTasksByLabel(@PathVariable Long userId,@RequestParam String label){
+        return taskService.getUserTasksFromLabel(userId,label);
+    }
 }

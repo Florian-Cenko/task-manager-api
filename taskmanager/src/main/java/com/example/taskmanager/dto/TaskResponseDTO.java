@@ -1,6 +1,7 @@
 package com.example.taskmanager.dto;
 
 import com.example.taskmanager.Priority;
+import com.example.taskmanager.Status;
 
 import java.time.LocalDate;
 
@@ -13,19 +14,19 @@ public class TaskResponseDTO {
     private String title;
     private LocalDate dueDate;
     private Priority priority;
-    private boolean completed;
+    private Status status;
 
     public TaskResponseDTO() {
     }
 
-    public TaskResponseDTO(String username, String categoryName, String email, String title, LocalDate dueDate, Priority priority, boolean completed) {
+    public TaskResponseDTO(String username, String categoryName, String email, String title, LocalDate dueDate, Priority priority, Status status) {
         this.username = username;
         this.categoryName = categoryName;
         this.email = email;
         this.title = title;
         this.dueDate = dueDate;
         this.priority = priority;
-        this.completed = completed;
+        this.status = status;
     }
 
     public String getUsername() {
@@ -76,12 +77,12 @@ public class TaskResponseDTO {
         this.priority = priority;
     }
 
-    public boolean isCompleted() {
-        return completed;
+    public Status getStatus() {
+        return status;
     }
 
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public Long getId() {

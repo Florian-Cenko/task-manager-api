@@ -1,6 +1,7 @@
 package com.example.taskmanager.model;
 
 import com.example.taskmanager.Priority;
+import com.example.taskmanager.Status;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -18,11 +19,14 @@ public class Task {
     private Long id;
     private String title;
     private LocalDate dueDate;
-    private boolean completed;
+    private String label;
 
     //Tell JPA to read Enums as String
     @Enumerated(EnumType.STRING)
     private Priority priority;
+
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.TODO;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -37,9 +41,14 @@ public class Task {
     public Task(){
     }
 
-    public Task(String title,boolean completed){
+    public Task(String title, LocalDate dueDate, String label, Priority priority, Status status, User user, Category category) {
         this.title = title;
-        this.completed = completed;
+        this.dueDate = dueDate;
+        this.label = label;
+        this.priority = priority;
+        this.status = status;
+        this.user = user;
+        this.category = category;
     }
 
     public String getTitle() {
@@ -54,17 +63,10 @@ public class Task {
         this.title = title;
     }
 
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
-    }
-
     public void setUser(User user) {
         this.user = user;
     }
+
     public LocalDate getDueDate() {
         return dueDate;
     }
@@ -72,7 +74,6 @@ public class Task {
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
-
 
     public void setId(Long id) {
         this.id = id;
@@ -96,6 +97,22 @@ public class Task {
 
     public User getUser() {
         return user;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }
 

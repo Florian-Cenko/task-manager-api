@@ -1,6 +1,7 @@
 package com.example.taskmanager.service;
 
 import com.example.taskmanager.Priority;
+import com.example.taskmanager.Status;
 import com.example.taskmanager.dto.TaskResponseDTO;
 import com.example.taskmanager.model.Category;
 import com.example.taskmanager.model.Task;
@@ -57,7 +58,7 @@ public class TaskService {
 
     public List<TaskResponseDTO> getDeadlineTasksIsNotCompleted(Long userId) {
         LocalDate today = LocalDate.now();
-        List<Task> tasks = taskRepository.findByUserIdAndDueDateAndCompletedFalse(userId, today);
+        List<Task> tasks = taskRepository.findByUserIdAndDueDateAndStatusNot(userId, today,Status.DONE); //STATUS NOT DONEEEE!!!!!!
         // 2. Τη μετατρέπουμε σε λίστα από DTOs SOSSSSS
         return tasks.stream()
                 .map(this::convertTaskToDTO) // Μετατρέπει κάθε Task σε TaskResponseDTO
@@ -66,7 +67,7 @@ public class TaskService {
 
     public TaskResponseDTO taskCompleted(Long id) {
         Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task doesn't exist"));
-        task.setCompleted(true);
+        task.setStatus(Status.DONE);
         Task savedTask = taskRepository.save(task);
         return convertTaskToDTO(savedTask);
     }
@@ -76,7 +77,7 @@ public class TaskService {
                 .orElseThrow(() -> new RuntimeException("Task doesn't exist"));
 
         task.setTitle(updTask.getTitle());
-        task.setCompleted(updTask.isCompleted());
+        task.setStatus(updTask.getStatus());
         task.setPriority(updTask.getPriority()); // Πρόσθεσε αυτό
         task.setDueDate(updTask.getDueDate());   // Και αυτό
 
@@ -115,27 +116,34 @@ public class TaskService {
 
     public String getUserStats(Long userId) {
         long total = taskRepository.countByUserId(userId);
-        long completedTasks = taskRepository.countByUserIdAndCompletedTrue(userId);
-        long notCompletedTasks = taskRepository.countByUserIdAndCompletedFalse(userId);
+        long completedTasks = taskRepository.countByUserIdAndStatus(userId,Status.DONE);
+        long pending = total - completedTasks;
 
         if (total == 0) {
             return "No tasks found for this User";
         }
         double percentage = ((double) completedTasks / total) * 100;
         return String.format("Stats for User %d: Total: %d | Completed: %d | Pending: %d | Progress: %.2f%%",
-                userId, total, completedTasks, notCompletedTasks, percentage);
+                userId, total, completedTasks, pending, percentage);
     }
 
     private TaskResponseDTO convertTaskToDTO(Task task){
         TaskResponseDTO dto = new TaskResponseDTO();
         dto.setId(task.getId());
         dto.setTitle(task.getTitle());
-        dto.setCompleted(task.isCompleted());
+        dto.setStatus(task.getStatus());
         dto.setPriority(task.getPriority());
         dto.setDueDate(task.getDueDate());
         dto.setUsername(task.getUser().getUsername());
         dto.setEmail(task.getUser().getEmail());
         dto.setCategoryName(task.getCategory().getName());
         return dto;
+    }
+    //This method returns Tasks accordingly the label that user search
+    public List<TaskResponseDTO> getUserTasksFromLabel(Long userId, String label){
+        List<Task> task = taskRepository.findByUserIdAndLabel(userId,label);
+        return task.stream()
+                .map(this::convertTaskToDTO)
+                .toList();
     }
 }
