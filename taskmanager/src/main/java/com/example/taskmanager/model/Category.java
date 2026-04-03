@@ -1,10 +1,7 @@
 package com.example.taskmanager.model;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-
-import java.util.ArrayList;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 
 @Entity
@@ -14,6 +11,9 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank
+    @Column(nullable = false)
     private String name;
 
     @OneToMany(mappedBy = "category",cascade = CascadeType.ALL) //Κοίτα, το αφεντικό της σχέσης είναι η μεταβλητή category που βρίσκεται μέσα στο Task.

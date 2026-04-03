@@ -1,6 +1,7 @@
 package com.example.taskmanager.controller;
 import com.example.taskmanager.model.Category;
 import com.example.taskmanager.service.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,7 +15,7 @@ public class CategoryController {
     }
 
     @PostMapping()
-    public Category createCategory(@RequestBody Category category){
+    public Category createCategory(@Valid @RequestBody Category category){
             return categoryService.createCategory(category);
     }
 

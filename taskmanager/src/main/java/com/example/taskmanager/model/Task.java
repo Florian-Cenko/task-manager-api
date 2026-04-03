@@ -1,14 +1,12 @@
 package com.example.taskmanager.model;
-
 import com.example.taskmanager.Priority;
 import com.example.taskmanager.Status;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @Table(name = "tasks")
@@ -17,8 +15,16 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank
+    @Column(nullable = false)
     private String title;
+
+    @FutureOrPresent
     private LocalDate dueDate;
+
+    @NotBlank
+    @Column(nullable = false)
     private String label;
 
     //Tell JPA to read Enums as String
