@@ -6,6 +6,7 @@ import com.example.taskmanager.model.User;
 import com.example.taskmanager.service.TaskService;
 import com.example.taskmanager.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,5 +44,13 @@ public class UserController {
         return taskService.getDeadlineTasksIsNotCompleted(userId);
     }
 
+    @GetMapping("/{userId}/tasks/paged")
+    public Page<TaskResponseDTO> getUserPagedTasks(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size){
+
+        return taskService.getAllTasksPaged(userId,page,size);
+    }
 }
 

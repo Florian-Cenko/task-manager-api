@@ -10,6 +10,9 @@ import com.example.taskmanager.repository.CategoryRepository;
 import com.example.taskmanager.repository.TaskRepository;
 import com.example.taskmanager.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -106,12 +109,11 @@ public class TaskService {
                 .toList();
     }
 
-    public List<TaskResponseDTO> getAllTasks() {
+    public Page<TaskResponseDTO> getAllTasksPaged(Long userId,int page,int size) {
+        Pageable pageable = PageRequest.of(page,size);
+        Page<Task> taskPage = taskRepository.findByUserId(userId,pageable);
+        return taskPage.map(this::convertTaskToDTO);
 
-        List<Task> tasks = taskRepository.findAll();
-        return tasks.stream()
-                .map(this::convertTaskToDTO)
-                .toList();
     }
 
     public String getUserStats(Long userId) {
