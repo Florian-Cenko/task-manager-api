@@ -49,11 +49,6 @@ public class TaskController {
         return taskService.allTasksForCategory(categoryId);
     }
 
-    @GetMapping()
-    public List<TaskResponseDTO> getAllTasks() {
-        return taskService.getAllTasks();
-    }
-
     @GetMapping("/{userId}/stats")
     public String getUserStats(@PathVariable Long userId) {
         return taskService.getUserStats(userId);
