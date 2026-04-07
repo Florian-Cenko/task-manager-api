@@ -2,10 +2,17 @@ package com.example.taskmanager.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+
 import java.util.List;
 
 @Entity
 @Table(name = "categories")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
 public class Category {
 
     @Id
@@ -20,26 +27,4 @@ public class Category {
     @JsonIgnoreProperties("category")
     private List<Task> tasksList;
 
-    public Category(){
-    }
-
-    public Category(String name){
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 }

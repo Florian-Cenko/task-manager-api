@@ -39,15 +39,21 @@ public class TaskService {
         this.taskMapper = taskMapper;
     }
 
-    public TaskResponseDTO createTask(Long userId, Long categoryId, Task task) {
+    public TaskResponseDTO createTask(Long userId, Long categoryId, Task taskRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category with this id" + categoryId + "does not exist"));
 
-        task.setId(null);
-        task.setUser(user);
-        task.setCategory(category);
+        Task task = Task.builder()
+                        .title(taskRequest.getTitle())
+                        .status(taskRequest.getStatus())
+                        .dueDate(taskRequest.getDueDate())
+                        .label(taskRequest.getLabel())
+                        .priority(taskRequest.getPriority())
+                        .user(user)
+                        .category(category).build();
+
         Task savedTask = taskRepository.save(task);
         return taskMapper.toDTO(savedTask);
     }
@@ -79,15 +85,17 @@ public class TaskService {
     }
 
     public TaskResponseDTO updateTask(Long id, Task updTask) {
-        Task task = taskRepository.findById(id)
+        Task existingTask = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task doesn't exist"));
 
-        task.setTitle(updTask.getTitle());
-        task.setStatus(updTask.getStatus());
-        task.setPriority(updTask.getPriority()); // Πρόσθεσε αυτό
-        task.setDueDate(updTask.getDueDate());   // Και αυτό
+        Task updatedTask = existingTask.toBuilder()
+                        .title(updTask.getTitle())
+                        .status(updTask.getStatus())
+                        .priority(updTask.getPriority())
+                        .dueDate(updTask.getDueDate())
+                        .build();
 
-        Task savedTask = taskRepository.save(task);
+        Task savedTask = taskRepository.save(updatedTask);
         return taskMapper.toDTO(savedTask);
     }
 
