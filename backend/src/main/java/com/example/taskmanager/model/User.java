@@ -1,4 +1,6 @@
 package com.example.taskmanager.model;
+import com.example.taskmanager.Priority;
+import com.example.taskmanager.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -21,12 +23,26 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @NotBlank
+    private String firstName;
+
+    @NotBlank
+    private String lastName;
+
     @NotBlank
     @Size(min = 3)
-    @Column(nullable = false)
+    @Column(nullable = false,unique = true)
     private String username;
     @Email
+    @Column(unique = true)
     private String email;
+
+    @NotBlank
+    @Size(min = 6)
+    private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("user") // ΠΡΟΣΘΕΣΕ ΑΥΤΟ!

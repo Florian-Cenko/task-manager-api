@@ -1,6 +1,7 @@
 package com.example.taskmanager.controller;
 import com.example.taskmanager.Priority;
 import com.example.taskmanager.dto.TaskResponseDTO;
+import com.example.taskmanager.dto.UserResponseDTO;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.model.User;
 import com.example.taskmanager.service.TaskService;
@@ -25,12 +26,12 @@ public class UserController {
     }
 
     @PostMapping()
-    public User createUser(@Valid @RequestBody User user){
+    public UserResponseDTO createUser(@Valid @RequestBody User user){
         return userService.createUser(user);
     }
 
     @GetMapping("/{userId}")
-    public User getUserFromId(@PathVariable Long userId){
+    public UserResponseDTO getUserFromId(@PathVariable Long userId){
         return userService.getUser(userId);
     }
 
