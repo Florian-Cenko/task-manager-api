@@ -3,6 +3,7 @@ package com.example.taskmanager.service;
 import com.example.taskmanager.Priority;
 import com.example.taskmanager.Status;
 import com.example.taskmanager.dto.TaskResponseDTO;
+import com.example.taskmanager.mapper.TaskMapper;
 import com.example.taskmanager.model.Category;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.model.User;
@@ -29,11 +30,13 @@ public class TaskService {
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
     private final CategoryRepository categoryRepository;
+    private final TaskMapper taskMapper;
 
-    public TaskService(UserRepository userRepository, TaskRepository taskRepository, CategoryRepository categoryRepository) {
+    public TaskService(UserRepository userRepository, TaskRepository taskRepository, CategoryRepository categoryRepository,TaskMapper taskMapper) {
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.categoryRepository = categoryRepository;
+        this.taskMapper = taskMapper;
     }
 
     public TaskResponseDTO createTask(Long userId, Long categoryId, Task task) {
@@ -46,7 +49,7 @@ public class TaskService {
         task.setUser(user);
         task.setCategory(category);
         Task savedTask = taskRepository.save(task);
-        return convertTaskToDTO(savedTask);
+        return taskMapper.toDTO(savedTask);
     }
 
     public List<TaskResponseDTO> getHighPriorityTasksForUser(Long userId, Priority priority) {
@@ -55,7 +58,7 @@ public class TaskService {
 
         // 2. Τη μετατρέπουμε σε λίστα από DTOs SOSSSSS
         return tasks.stream()
-                .map(this::convertTaskToDTO) // Μετατρέπει κάθε Task σε TaskResponseDTO
+                .map(taskMapper::toDTO) // Μετατρέπει κάθε Task σε TaskResponseDTO
                 .toList();// Την ξανακάνει λίστα
     }
 
@@ -64,7 +67,7 @@ public class TaskService {
         List<Task> tasks = taskRepository.findByUserIdAndDueDateAndStatusNot(userId, today,Status.DONE); //STATUS NOT DONEEEE!!!!!!
         // 2. Τη μετατρέπουμε σε λίστα από DTOs SOSSSSS
         return tasks.stream()
-                .map(this::convertTaskToDTO) // Μετατρέπει κάθε Task σε TaskResponseDTO
+                .map(taskMapper::toDTO) // Μετατρέπει κάθε Task σε TaskResponseDTO
                 .toList();// Την ξανακάνει λίστα
     }
 
@@ -72,7 +75,7 @@ public class TaskService {
         Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task doesn't exist"));
         task.setStatus(Status.DONE);
         Task savedTask = taskRepository.save(task);
-        return convertTaskToDTO(savedTask);
+        return taskMapper.toDTO(savedTask);
     }
 
     public TaskResponseDTO updateTask(Long id, Task updTask) {
@@ -85,7 +88,7 @@ public class TaskService {
         task.setDueDate(updTask.getDueDate());   // Και αυτό
 
         Task savedTask = taskRepository.save(task);
-        return convertTaskToDTO(savedTask);
+        return taskMapper.toDTO(savedTask);
     }
 
     public void deleteTask(Long id) {
@@ -105,14 +108,14 @@ public class TaskService {
         List<Task> tasks = taskRepository.findByCategoryId(categoryId);
 
         return tasks.stream()
-                .map(this::convertTaskToDTO)
+                .map(taskMapper::toDTO)
                 .toList();
     }
 
     public Page<TaskResponseDTO> getAllTasksPaged(Long userId,int page,int size) {
         Pageable pageable = PageRequest.of(page,size);
         Page<Task> taskPage = taskRepository.findByUserId(userId,pageable);
-        return taskPage.map(this::convertTaskToDTO);
+        return taskPage.map(taskMapper::toDTO);
 
     }
 
@@ -129,23 +132,11 @@ public class TaskService {
                 userId, total, completedTasks, pending, percentage);
     }
 
-    private TaskResponseDTO convertTaskToDTO(Task task){
-        TaskResponseDTO dto = new TaskResponseDTO();
-        dto.setId(task.getId());
-        dto.setTitle(task.getTitle());
-        dto.setStatus(task.getStatus());
-        dto.setPriority(task.getPriority());
-        dto.setDueDate(task.getDueDate());
-        dto.setUsername(task.getUser().getUsername());
-        dto.setEmail(task.getUser().getEmail());
-        dto.setCategoryName(task.getCategory().getName());
-        return dto;
-    }
     //This method returns Tasks accordingly the label that user search
     public List<TaskResponseDTO> getUserTasksFromLabel(Long userId, String label){
         List<Task> task = taskRepository.findByUserIdAndLabel(userId,label);
         return task.stream()
-                .map(this::convertTaskToDTO)
+                .map(taskMapper::toDTO)
                 .toList();
     }
 }
