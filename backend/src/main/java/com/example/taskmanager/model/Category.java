@@ -23,6 +23,13 @@ public class Category {
     @Column(nullable = false)
     private String name;
 
+    private String description;
+    private String color;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id",nullable = false)
+    private User user;
+
     @OneToMany(mappedBy = "category",cascade = CascadeType.ALL) //Κοίτα, το αφεντικό της σχέσης είναι η μεταβλητή category που βρίσκεται μέσα στο Task.
     @JsonIgnoreProperties("category")
     private List<Task> tasksList;
