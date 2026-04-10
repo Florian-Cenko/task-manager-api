@@ -30,4 +30,9 @@ public class CategoryController {
         return categoryService.allCategoriesForUser(userId);
     }
 
+    @DeleteMapping("/{categoryId}/user/{userId}")
+    public void softDeleteCategory(@PathVariable Long categoryId,@PathVariable Long userId){
+        categoryService.deleteCategory(categoryId,userId);
+    }
+
 }

@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 public class TaskService {
 
     private final UserRepository userRepository;
@@ -39,6 +41,7 @@ public class TaskService {
         this.taskMapper = taskMapper;
     }
 
+    @Transactional
     public TaskResponseDTO createTask(Long userId, Long categoryId, Task taskRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
@@ -60,7 +63,7 @@ public class TaskService {
 
     public List<TaskResponseDTO> getHighPriorityTasksForUser(Long userId, Priority priority) {
 
-        List<Task> tasks = taskRepository.findByUserIdAndPriority(userId, priority);
+        List<Task> tasks = taskRepository.findByUserIdAndPriorityAndActiveTrue(userId, priority);
 
         // 2. Τη μετατρέπουμε σε λίστα από DTOs SOSSSSS
         return tasks.stream()
@@ -70,41 +73,41 @@ public class TaskService {
 
     public List<TaskResponseDTO> getDeadlineTasksIsNotCompleted(Long userId) {
         LocalDate today = LocalDate.now();
-        List<Task> tasks = taskRepository.findByUserIdAndDueDateAndStatusNot(userId, today,Status.DONE); //STATUS NOT DONEEEE!!!!!!
+        List<Task> tasks = taskRepository.findByUserIdAndDueDateAndStatusNotAndActiveTrue(userId, today,Status.DONE); //STATUS NOT DONEEEE!!!!!!
         // 2. Τη μετατρέπουμε σε λίστα από DTOs SOSSSSS
         return tasks.stream()
                 .map(taskMapper::toDTO) // Μετατρέπει κάθε Task σε TaskResponseDTO
                 .toList();// Την ξανακάνει λίστα
     }
 
-    public TaskResponseDTO taskCompleted(Long id) {
-        Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task doesn't exist"));
-        task.setStatus(Status.DONE);
-        Task savedTask = taskRepository.save(task);
-        return taskMapper.toDTO(savedTask);
-    }
-
+    @Transactional
     public TaskResponseDTO updateTask(Long id, Task updTask) {
         Task existingTask = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task doesn't exist"));
 
-        Task updatedTask = existingTask.toBuilder()
-                        .title(updTask.getTitle())
-                        .status(updTask.getStatus())
-                        .priority(updTask.getPriority())
-                        .dueDate(updTask.getDueDate())
-                        .build();
+        existingTask.setTitle(updTask.getTitle());
+        existingTask.setStatus(updTask.getStatus());
+        existingTask.setPriority(updTask.getPriority());
+        existingTask.setDueDate(updTask.getDueDate());
 
-        Task savedTask = taskRepository.save(updatedTask);
+        Task savedTask = taskRepository.save(existingTask);
         return taskMapper.toDTO(savedTask);
     }
 
-    public void deleteTask(Long id) {
-        boolean exists = taskRepository.existsById(id);
-        if (!exists) {
-            throw new RuntimeException("Task with this id" + id + "does not exist");
+    @Transactional
+    public void deleteTask(Long taskId,Long userId) {
+
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task doesn't exist"));
+
+        if (!task.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Not authorized to delete this task");
         }
-        taskRepository.deleteById(id);
+        Task deletedTask = task.toBuilder()
+                .active(false)
+                .build();
+
+        taskRepository.save(deletedTask);
     }
 
     public List<TaskResponseDTO> allTasksForCategory(Long categoryId) {
@@ -113,23 +116,16 @@ public class TaskService {
         if (!categoryExists) {
             throw new RuntimeException("Category with id" + categoryId + "does not exist");
         }
-        List<Task> tasks = taskRepository.findByCategoryId(categoryId);
+        List<Task> tasks = taskRepository.findByCategoryIdAndActiveTrue(categoryId);
 
         return tasks.stream()
                 .map(taskMapper::toDTO)
                 .toList();
     }
 
-    public Page<TaskResponseDTO> getAllTasksPaged(Long userId,int page,int size) {
-        Pageable pageable = PageRequest.of(page,size);
-        Page<Task> taskPage = taskRepository.findByUserId(userId,pageable);
-        return taskPage.map(taskMapper::toDTO);
-
-    }
-
     public String getUserStats(Long userId) {
-        long total = taskRepository.countByUserId(userId);
-        long completedTasks = taskRepository.countByUserIdAndStatus(userId,Status.DONE);
+        long total = taskRepository.countByUserIdAndActiveTrue(userId);
+        long completedTasks = taskRepository.countByUserIdAndStatusAndActiveTrue(userId,Status.DONE);
         long pending = total - completedTasks;
 
         if (total == 0) {
@@ -142,9 +138,22 @@ public class TaskService {
 
     //This method returns Tasks accordingly the label that user search
     public List<TaskResponseDTO> getUserTasksFromLabel(Long userId, String label){
-        List<Task> task = taskRepository.findByUserIdAndLabel(userId,label);
+        List<Task> task = taskRepository.findByUserIdAndLabelAndActiveTrue(userId,label);
         return task.stream()
                 .map(taskMapper::toDTO)
                 .toList();
     }
+
+    public List<TaskResponseDTO> allTasksForUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("User not found");
+        }
+
+        List<Task> tasks = taskRepository.findByUserIdAndActiveTrue(userId);
+
+        return tasks.stream()
+                .map(taskMapper::toDTO)
+                .toList();
+    }
 }
+

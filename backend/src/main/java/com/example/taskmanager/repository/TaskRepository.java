@@ -14,11 +14,11 @@ import java.util.List;
 @Repository
 public interface TaskRepository extends JpaRepository<Task,Long> {
 
-    Page<Task> findByUserId(Long userId, Pageable page);
-    List<Task> findByUserIdAndPriority(Long userId, Priority priority);
-    List<Task> findByCategoryId(Long categoryId);
-    List<Task> findByUserIdAndDueDateAndStatusNot(Long userId, LocalDate dueDate, Status status);
-    long countByUserId(Long userId);
-    long countByUserIdAndStatus(Long userId, Status status);
-    List<Task> findByUserIdAndLabel(Long userId,String label);
+    List<Task> findByUserIdAndActiveTrue(Long userId);
+    List<Task> findByUserIdAndPriorityAndActiveTrue(Long userId, Priority priority);
+    List<Task> findByCategoryIdAndActiveTrue(Long categoryId);
+    List<Task> findByUserIdAndDueDateAndStatusNotAndActiveTrue(Long userId, LocalDate dueDate, Status status);
+    long countByUserIdAndActiveTrue(Long userId);
+    long countByUserIdAndStatusAndActiveTrue(Long userId, Status status);
+    List<Task> findByUserIdAndLabelAndActiveTrue(Long userId,String label);
 }

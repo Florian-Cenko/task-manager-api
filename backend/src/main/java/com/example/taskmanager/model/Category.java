@@ -34,4 +34,7 @@ public class Category {
     @JsonIgnoreProperties("category")
     private List<Task> tasksList;
 
+    @Builder.Default
+    private boolean active = true;
+
 }

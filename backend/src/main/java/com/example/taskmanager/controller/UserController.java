@@ -44,14 +44,5 @@ public class UserController {
     public List<TaskResponseDTO> getDeadlineTasksIsNotCompleted(@PathVariable Long userId){
         return taskService.getDeadlineTasksIsNotCompleted(userId);
     }
-
-    @GetMapping("/{userId}/tasks/paged")
-    public Page<TaskResponseDTO> getUserPagedTasks(
-            @PathVariable Long userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size){
-
-        return taskService.getAllTasksPaged(userId,page,size);
-    }
 }
 

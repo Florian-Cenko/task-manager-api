@@ -49,5 +49,8 @@ public class Task {
     @JoinColumn(name = "category_id")
     @JsonIgnoreProperties("tasksList")
     private Category category;
+
+    @Builder.Default
+    private boolean active = true;
 }
 
