@@ -1,5 +1,7 @@
 package com.example.taskmanager.controller;
 
+import com.example.taskmanager.Priority;
+import com.example.taskmanager.Status;
 import com.example.taskmanager.dto.CategoryResponseDTO;
 import com.example.taskmanager.dto.TaskResponseDTO;
 import com.example.taskmanager.model.Task;
@@ -7,6 +9,10 @@ import com.example.taskmanager.repository.CategoryRepository;
 import com.example.taskmanager.repository.TaskRepository;
 import com.example.taskmanager.service.TaskService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,5 +64,19 @@ public class TaskController {
     @GetMapping("{userId}/allTasks")
     public List<TaskResponseDTO> allTasksForUser(@PathVariable Long userId){
         return taskService.allTasksForUser(userId);
+    }
+
+    @GetMapping("/search")
+    public Page<TaskResponseDTO> searchTasks(
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) Status status,
+            @RequestParam(required = false) Priority priority,
+            @RequestParam(required = false) String title,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id,desc") String[] sort){
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort[0]).descending());
+        return taskService.getTasksPaged(userId,status,priority,title,pageable);
     }
 }

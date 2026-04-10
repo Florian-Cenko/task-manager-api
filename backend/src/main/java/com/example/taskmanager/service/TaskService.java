@@ -10,10 +10,12 @@ import com.example.taskmanager.model.User;
 import com.example.taskmanager.repository.CategoryRepository;
 import com.example.taskmanager.repository.TaskRepository;
 import com.example.taskmanager.repository.UserRepository;
+import com.example.taskmanager.specifications.TaskSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -154,6 +156,19 @@ public class TaskService {
         return tasks.stream()
                 .map(taskMapper::toDTO)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TaskResponseDTO> getTasksPaged(Long userId,Status status,Priority priority,String title,Pageable pageable){
+        Specification<Task> specification = Specification.where(TaskSpecifications.hasUserId(userId))
+                .and(TaskSpecifications.hasStatus(status))
+                .and(TaskSpecifications.hasPriority(priority))
+                .and(TaskSpecifications.titleContains(title))
+                .and(TaskSpecifications.isActive());
+
+        Page<Task> tasks = taskRepository.findAll(specification,pageable);
+
+        return tasks.map(taskMapper::toDTO);
     }
 }
 
