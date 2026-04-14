@@ -41,9 +41,9 @@ public class TaskController {
         taskService.deleteTask(taskId,userId);
     }
 
-    @PutMapping("/{id}")
-    public TaskResponseDTO taskUpdated(@PathVariable Long id, @Valid @RequestBody Task updatedTask) {
-        return taskService.updateTask(id, updatedTask);
+    @PutMapping("/{taskId}")
+    public TaskResponseDTO taskUpdated(@RequestParam Long taskId, @RequestParam Long userId, @Valid @RequestBody Task updatedTask) {
+        return taskService.updateTask(taskId,userId, updatedTask);
     }
 
     @GetMapping("/category/{categoryId}")

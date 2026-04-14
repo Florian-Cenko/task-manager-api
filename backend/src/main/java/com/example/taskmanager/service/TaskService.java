@@ -10,6 +10,7 @@ import com.example.taskmanager.model.User;
 import com.example.taskmanager.repository.CategoryRepository;
 import com.example.taskmanager.repository.TaskRepository;
 import com.example.taskmanager.repository.UserRepository;
+import com.example.taskmanager.security.CheckTaskOwnership;
 import com.example.taskmanager.specifications.TaskSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -83,9 +84,9 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponseDTO updateTask(Long id, Task updTask) {
-        Task existingTask = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Task doesn't exist"));
+    @CheckTaskOwnership
+    public TaskResponseDTO updateTask(Long id,Long userId, Task updTask) {
+        Task existingTask = taskRepository.findById(id).get();
 
         existingTask.setTitle(updTask.getTitle());
         existingTask.setStatus(updTask.getStatus());
@@ -97,14 +98,10 @@ public class TaskService {
     }
 
     @Transactional
+    @CheckTaskOwnership
     public void deleteTask(Long taskId,Long userId) {
 
-        Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task doesn't exist"));
-
-        if (!task.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Not authorized to delete this task");
-        }
+        Task task = taskRepository.findById(taskId).get();
         Task deletedTask = task.toBuilder()
                 .active(false)
                 .build();
