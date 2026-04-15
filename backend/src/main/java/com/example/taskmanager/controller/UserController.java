@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:5173") // Η default θύρα της React (Vite)
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
