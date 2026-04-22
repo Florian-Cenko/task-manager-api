@@ -1,19 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import TaskForm from "./components/TaskForm";
 import TaskList from "./components/TaskList";
 import LoginForm from "./components/LoginForm";
 import { addTask, getAllTasks, updateTask, deleteTask, getTasksFiltered } from "./services/taskService";
+import RegisterForm from "./components/RegisterForm";
 
 function App() {
     // --- State Management ---
     const [tasks, setTasks] = useState([]);
+    const [newLabel, setNewLabel] = useState("");
+    const [newPriority, setNewPriority] = useState("");
     const [newTaskTitle, setNewTaskTitle] = useState("");
     const [searchTitle, setSearchTitle] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
     const [filterPriority, setFilterPriority] = useState("");
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-    
+    const [showRegister, setShowRegister] = useState(false); // Το κλειδί είναι εδώ!
     // Check if user is logged in via Session Storage
     const [userId, setUserId] = useState(sessionStorage.getItem("userId")); 
     const categoryId = 1;
@@ -63,10 +66,7 @@ function App() {
     }, [userId, searchTitle, filterStatus, filterPriority, page]); 
 
     // --- Conditional Rendering: Gatekeeper ---
-    // If not logged in, show only the login form and exit
-    if (!userId) {
-        return <LoginForm onLoginSuccess={setUserId} />;
-    }
+
 
     // --- CRUD Operations ---
 
@@ -76,9 +76,9 @@ function App() {
 
         const newTaskPayload = {
             title: newTaskTitle,
-            label: "General",
+            label: newLabel,
             status: "TODO",
-            priority: "LOW",
+            priority: newPriority,
             dueDate: new Date().toISOString().split('T')[0],
             active: true
         };
@@ -87,6 +87,8 @@ function App() {
             const savedTask = await addTask(userId, categoryId, newTaskPayload);
             setTasks([...tasks, savedTask]); // Update local state
             setNewTaskTitle(""); // Clear input
+            setNewLabel("");
+            setNewPriority("");
         } catch (err) {
             console.error("Error adding task:", err);
         }
@@ -122,6 +124,30 @@ function App() {
         }
     };
 
+    // --- Authentication Gatekeeper ---
+    // If the user is not logged in, we intercept the render 
+    // to display the Auth forms instead of the Task UI.
+    if (!userId) {
+        return (
+            <div>
+                {/* Conditional Rendering: 
+                    Toggle between the Registration and Login forms 
+                    based on the 'showRegister' state.
+                */}
+                {showRegister ? (
+                    <RegisterForm 
+                        onRegisterSuccess={() => setShowRegister(false)} // Return to login after successful sign-up
+                        onSwitchToLogin={() => setShowRegister(false)}   // Manual navigation back to login
+                    />
+                ) : (
+                    <LoginForm
+                        onLoginSuccess={setUserId}                      // Persist state upon successful authentication
+                        onSwitchToRegister={() => setShowRegister(true)} // Manual navigation to registration
+                    />
+                )}
+            </div>
+        );
+    }
     // --- Render ---
     return (
         <div>
@@ -177,6 +203,10 @@ function App() {
             <TaskForm
                 taskTitle={newTaskTitle}
                 onTitleChange={setNewTaskTitle}
+                label={newLabel}
+                onLabelChange={setNewLabel}
+                priority={newPriority}
+                onPriorityChange={setNewPriority}
                 onAdd={handleAddTask}
             />
         </div>

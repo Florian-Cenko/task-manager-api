@@ -1,5 +1,7 @@
 package com.example.taskmanager.service;
 
+import com.example.taskmanager.Role;
+import com.example.taskmanager.dto.UserRegistrationDTO;
 import com.example.taskmanager.dto.UserResponseDTO;
 import com.example.taskmanager.mapper.UserMapper;
 import com.example.taskmanager.model.User;
@@ -19,7 +21,24 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
-    public UserResponseDTO createUser(User user){
+    public UserResponseDTO createUser(UserRegistrationDTO userRegistrationDTO){
+
+        if (userRepository.existsByEmail(userRegistrationDTO.getEmail())) {
+            throw new RuntimeException("Email is already taken!");
+        }
+        if (userRepository.existsByUsername(userRegistrationDTO.getUsername())) {
+            throw new RuntimeException("Username is already taken!");
+        }
+        User user = User.builder()
+                .firstName(userRegistrationDTO.getFirstName())
+                .lastName(userRegistrationDTO.getLastName())
+                .username(userRegistrationDTO.getUsername())
+                .email(userRegistrationDTO.getEmail())
+                .password(userRegistrationDTO.getPassword())
+                .build();
+
+        // 3. Default Role (Πολύ σημαντικό: μην αφήνεις τον χρήστη να διαλέγει Role)
+        user.setRole(Role.ROLE_USER);
         User savedUser = userRepository.save(user);
         return userMapper.toDTO(savedUser);
     }

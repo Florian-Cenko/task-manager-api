@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { login } from "../services/authService";
 
-export default function LoginForm({ onLoginSuccess }) {
+export default function LoginForm({ onLoginSuccess,onSwitchToRegister }) {
 
     // State management for user credentials
     const [email, setEmail] = useState("");
@@ -49,6 +49,11 @@ export default function LoginForm({ onLoginSuccess }) {
                 /><br/>
                 
                 <button type="submit">Login</button>
+                <p>
+                    Don't have an account? 
+                    <button type="button" onClick={onSwitchToRegister}>Register here</button>
+                </p>
+                
             </form>
         </div>
     );

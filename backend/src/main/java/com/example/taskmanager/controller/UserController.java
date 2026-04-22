@@ -1,6 +1,7 @@
 package com.example.taskmanager.controller;
 import com.example.taskmanager.Priority;
 import com.example.taskmanager.dto.TaskResponseDTO;
+import com.example.taskmanager.dto.UserRegistrationDTO;
 import com.example.taskmanager.dto.UserResponseDTO;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.model.User;
@@ -26,7 +27,7 @@ public class UserController {
     }
 
     @PostMapping()
-    public UserResponseDTO createUser(@Valid @RequestBody User user){
+    public UserResponseDTO createUser(@Valid @RequestBody UserRegistrationDTO user){
         return userService.createUser(user);
     }
 
