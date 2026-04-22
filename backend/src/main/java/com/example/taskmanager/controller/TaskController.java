@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:5173") // Η default θύρα της React (Vite)
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
@@ -43,8 +42,8 @@ public class TaskController {
     }
 
     @PutMapping("/{taskId}")
-    public TaskResponseDTO taskUpdated(@RequestParam Long taskId, @RequestParam Long userId, @Valid @RequestBody Task updatedTask) {
-        return taskService.updateTask(taskId,userId, updatedTask);
+    public TaskResponseDTO taskUpdated(@PathVariable Long taskId, @Valid @RequestBody Task updatedTask) {
+        return taskService.updateTask(taskId, updatedTask);
     }
 
     @GetMapping("/category/{categoryId}")

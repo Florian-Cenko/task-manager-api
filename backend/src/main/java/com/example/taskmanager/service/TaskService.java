@@ -85,28 +85,37 @@ public class TaskService {
 
     @Transactional
     @CheckTaskOwnership
-    public TaskResponseDTO updateTask(Long id,Long userId, Task updTask) {
-        Task existingTask = taskRepository.findById(id).get();
+    public TaskResponseDTO updateTask(Long id, Task updTask) {
+        Task existingTask = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
 
         existingTask.setTitle(updTask.getTitle());
         existingTask.setStatus(updTask.getStatus());
         existingTask.setPriority(updTask.getPriority());
+        existingTask.setLabel(updTask.getLabel());
         existingTask.setDueDate(updTask.getDueDate());
 
         Task savedTask = taskRepository.save(existingTask);
         return taskMapper.toDTO(savedTask);
     }
 
+
     @Transactional
     @CheckTaskOwnership
-    public void deleteTask(Long taskId,Long userId) {
+    public void deleteTask(Long taskId, Long userId) {
+        // Βρες το task και βεβαιώσου ότι ανήκει στον χρήστη
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Το task δεν βρέθηκε!"));
 
-        Task task = taskRepository.findById(taskId).get();
-        Task deletedTask = task.toBuilder()
-                .active(false)
-                .build();
+        if (!task.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Απαγορεύεται η διαγραφή (Access Denied)");
+        }
 
-        taskRepository.save(deletedTask);
+        // Κάνε το soft delete
+        task.setActive(false);
+
+        // ΕΝΕΡΓΟΠΟΙΗΣΕ ΤΟ SAVE - Είναι απαραίτητο για να δει το Hibernate την αλλαγή
+        taskRepository.save(task);
     }
 
     public List<TaskResponseDTO> allTasksForCategory(Long categoryId) {
