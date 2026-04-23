@@ -12,15 +12,22 @@ export const getAllTasks = async (userId) => {
 
 // POST: Create a new task
 export const addTask = async (userId, categoryId, taskPayload) => {
-    // Send POST request with user and category IDs as query parameters
-    const response = await fetch(`${BASE_URL}/add?userId=${userId}&categoryId=${categoryId}`, {
+    const url = `${BASE_URL}/add?userId=${userId}&categoryId=${categoryId}`;
+    
+    const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(taskPayload) // Convert task object to JSON string
+        body: JSON.stringify(taskPayload)
     });
 
-    if(!response.ok) throw new Error("Failed to create a new Task");
-    return response.json(); // Return the created task object
+    // Εδώ είναι η αλλαγή: αν δεν είναι OK, διάβασε το JSON του error
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "Unknown server error" }));
+        console.error("Backend Error Details:", errorData); // <-- Αυτό θα τυπωθεί στην κονσόλα
+        throw new Error(errorData.message || "Failed to create a new Task");
+    }
+    
+    return response.json();
 };
 
 // PUT: Update an existing task
@@ -63,4 +70,16 @@ export const getTasksFiltered = async(params, page = 0) => {
     const response = await fetch(url);
     if (!response.ok) throw new Error("Filter search failed");
     return response.json(); // Return the paginated response
+};
+
+export const getUserStats = async(userId) =>{
+
+    const response = await fetch(`${BASE_URL}/${userId}/stats`);
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch statistics");
+    }
+    
+    // Εδώ το response.json() θα γίνει απευθείας το αντικείμενο StatsResponseDTO!
+    return response.json();
 };

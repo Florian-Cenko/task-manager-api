@@ -4,6 +4,7 @@ import TaskList from "./components/TaskList";
 import LoginForm from "./components/LoginForm";
 import { addTask, getAllTasks, updateTask, deleteTask, getTasksFiltered } from "./services/taskService";
 import RegisterForm from "./components/RegisterForm";
+import UserStats from "./components/UserStats";
 
 function App() {
     // --- State Management ---
@@ -209,6 +210,9 @@ function App() {
                 onPriorityChange={setNewPriority}
                 onAdd={handleAddTask}
             />
+
+            <UserStats userId={userId} tasks={tasks}/>
+
         </div>
     );
 }

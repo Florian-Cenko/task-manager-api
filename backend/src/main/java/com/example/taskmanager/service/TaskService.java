@@ -2,6 +2,7 @@ package com.example.taskmanager.service;
 
 import com.example.taskmanager.Priority;
 import com.example.taskmanager.Status;
+import com.example.taskmanager.dto.StatsResponseDTO;
 import com.example.taskmanager.dto.TaskResponseDTO;
 import com.example.taskmanager.mapper.TaskMapper;
 import com.example.taskmanager.model.Category;
@@ -131,17 +132,16 @@ public class TaskService {
                 .toList();
     }
 
-    public String getUserStats(Long userId) {
+    public StatsResponseDTO getUserStats(Long userId) {
         long total = taskRepository.countByUserIdAndActiveTrue(userId);
         long completedTasks = taskRepository.countByUserIdAndStatusAndActiveTrue(userId,Status.DONE);
-        long pending = total - completedTasks;
 
-        if (total == 0) {
-            return "No tasks found for this User";
-        }
-        double percentage = ((double) completedTasks / total) * 100;
-        return String.format("Stats for User %d: Total: %d | Completed: %d | Pending: %d | Progress: %.2f%%",
-                userId, total, completedTasks, pending, percentage);
+        StatsResponseDTO dto = new StatsResponseDTO();
+        dto.setTotalTasks((int)total);
+        dto.setCompletedTasks((int)completedTasks);
+        dto.setPendingTasks((int) (total - completedTasks));
+        dto.setProgress(total == 0 ? 0 : ((float) completedTasks/total) * 100);
+        return dto;
     }
 
     //This method returns Tasks accordingly the label that user search

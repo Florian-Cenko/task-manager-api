@@ -3,6 +3,7 @@ package com.example.taskmanager.controller;
 import com.example.taskmanager.Priority;
 import com.example.taskmanager.Status;
 import com.example.taskmanager.dto.CategoryResponseDTO;
+import com.example.taskmanager.dto.StatsResponseDTO;
 import com.example.taskmanager.dto.TaskResponseDTO;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.repository.CategoryRepository;
@@ -52,7 +53,7 @@ public class TaskController {
     }
 
     @GetMapping("/{userId}/stats")
-    public String getUserStats(@PathVariable Long userId) {
+    public StatsResponseDTO getUserStats(@PathVariable Long userId) {
         return taskService.getUserStats(userId);
     }
 
