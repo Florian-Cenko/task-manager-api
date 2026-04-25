@@ -20,7 +20,7 @@ public class CategoryController {
         this.categoryRepository = categoryRepository;
     }
 
-    @PostMapping()
+    @PostMapping("/createCategory")
     public CategoryResponseDTO createCategory(@Valid @RequestBody Category category, @RequestParam Long userId){
             return categoryService.createCategory(category,userId);
     }

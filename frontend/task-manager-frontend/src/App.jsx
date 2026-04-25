@@ -1,175 +1,56 @@
-import { useState, useEffect, use } from "react";
+import { useState } from "react";
 import TaskForm from "./components/TaskForm";
 import TaskList from "./components/TaskList";
 import LoginForm from "./components/LoginForm";
-import { addTask, getAllTasks, updateTask, deleteTask, getTasksFiltered } from "./services/taskService";
 import RegisterForm from "./components/RegisterForm";
 import UserStats from "./components/UserStats";
+import { useTasks } from "./hooks/useTasks";
+import { useCategoryManager } from "./hooks/useCategoryManager";
 
 function App() {
-    // --- State Management ---
-    const [tasks, setTasks] = useState([]);
-    const [newLabel, setNewLabel] = useState("");
-    const [newPriority, setNewPriority] = useState("");
-    const [newTaskTitle, setNewTaskTitle] = useState("");
-    const [searchTitle, setSearchTitle] = useState("");
-    const [filterStatus, setFilterStatus] = useState("");
-    const [filterPriority, setFilterPriority] = useState("");
-    const [page, setPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
-    const [showRegister, setShowRegister] = useState(false); // Το κλειδί είναι εδώ!
-    // Check if user is logged in via Session Storage
+    const [showRegister, setShowRegister] = useState(false);
     const [userId, setUserId] = useState(sessionStorage.getItem("userId")); 
-    const categoryId = 1;
 
-    // --- Data Fetching Logic ---
-    useEffect(() => {
-        // Guard Clause: Stop execution if no user is logged in
-        if (!userId) {
-            return; 
-        }
+    // Χρήση των Hooks
+    const { 
+        tasks, newLabel, setNewLabel, newPriority, setNewPriority,
+        newTaskTitle, setNewTaskTitle, searchTitle, setSearchTitle,
+        filterStatus, setFilterStatus, filterPriority, setFilterPriority,
+        page, setPage, totalPages, handleAddTask, handleDeleteTask, handleUpdate 
+    } = useTasks(userId);
 
-        const hasFilters = searchTitle || filterStatus || filterPriority;
-
-        if (!hasFilters) {
-            // Fetch all tasks if no filters are applied
-            getAllTasks(userId)
-                .then(data => {
-                    setTasks(data); 
-                    setTotalPages(1);
-                })
-                .catch(err => console.error("Error fetching tasks:", err));
-        } else {
-            // Prepare filter object
-            const rawFilters = {
-                userId: userId,
-                title: searchTitle,
-                status: filterStatus,
-                priority: filterPriority
-            };
-
-            // Remove empty/null fields to send a clean payload
-            const cleanFilters = {};
-            Object.keys(rawFilters).forEach(key => {
-                if (rawFilters[key] !== "" && rawFilters[key] !== null && rawFilters[key] !== undefined) {
-                    cleanFilters[key] = rawFilters[key];
-                }
-            });
-
-            // Fetch filtered and paginated tasks
-            getTasksFiltered(cleanFilters, page)
-                .then(data => {
-                    setTasks(data.content);
-                    setTotalPages(data.totalPages);
-                })
-                .catch(err => console.error("Error filtering tasks:", err));
-        }
-    }, [userId, searchTitle, filterStatus, filterPriority, page]); 
-
-    // --- Conditional Rendering: Gatekeeper ---
-
-
-    // --- CRUD Operations ---
-
-    // POST: Add a new task
-    const handleAddTask = async () => {
-        if(!newTaskTitle.trim()) return; // Prevent adding empty tasks
-
-        const newTaskPayload = {
-            title: newTaskTitle,
-            label: newLabel,
-            status: "TODO",
-            priority: newPriority,
-            dueDate: new Date().toISOString().split('T')[0],
-            active: true
-        };
-
-        try {
-            const savedTask = await addTask(userId, categoryId, newTaskPayload);
-            setTasks([...tasks, savedTask]); // Update local state
-            setNewTaskTitle(""); // Clear input
-            setNewLabel("");
-            setNewPriority("");
-        } catch (err) {
-            console.error("Error adding task:", err);
-        }
-    };
-
-    // DELETE: Remove a task
-    const handleDeleteTask = async (id) => {
-        try {
-            await deleteTask(id, userId);
-            setTasks(tasks.filter(task => task.id !== id)); // Remove from UI
-        } catch (err) {
-            console.error("Error deleting task:", err);
-        }
-    };
-
-    // PUT: Update an existing task
-    const handleUpdate = async (task, newStatus) => {
-        const updatedData = {
-            title: task.title,
-            status: newStatus,
-            priority: task.priority,
-            dueDate: task.dueDate ? task.dueDate.split("T")[0] : null,
-            label: task.label ?? "General",
-        };
-
-        try {
-            await updateTask(task.id, updatedData);
-            // Map through current tasks and update only the modified one
-            setTasks(tasks.map(t => t.id === task.id ? {...t, status: newStatus } : t));
-        } catch (error) {
-            console.error("Error updating task:", error);
-            alert("Task not updated");
-        }
-    };
+    const { 
+        categories, selectedCategoryId, setSelectedCategoryId, 
+        newCatName, setNewCatName, handleAddCategory 
+    } = useCategoryManager(userId);
 
     // --- Authentication Gatekeeper ---
-    // If the user is not logged in, we intercept the render 
-    // to display the Auth forms instead of the Task UI.
     if (!userId) {
         return (
             <div>
-                {/* Conditional Rendering: 
-                    Toggle between the Registration and Login forms 
-                    based on the 'showRegister' state.
-                */}
                 {showRegister ? (
                     <RegisterForm 
-                        onRegisterSuccess={() => setShowRegister(false)} // Return to login after successful sign-up
-                        onSwitchToLogin={() => setShowRegister(false)}   // Manual navigation back to login
+                        onRegisterSuccess={() => setShowRegister(false)}
+                        onSwitchToLogin={() => setShowRegister(false)}
                     />
                 ) : (
                     <LoginForm
-                        onLoginSuccess={setUserId}                      // Persist state upon successful authentication
-                        onSwitchToRegister={() => setShowRegister(true)} // Manual navigation to registration
+                        onLoginSuccess={setUserId}
+                        onSwitchToRegister={() => setShowRegister(true)}
                     />
                 )}
             </div>
         );
     }
+
     // --- Render ---
     return (
         <div>
-            <h1>My Task List!</h1>
-
-            {/* Logout: Clear session and reset state */}
-            <button onClick={() => {
-                sessionStorage.removeItem("userId");
-                setUserId(null);
-            }}>Logout</button>
+            <h1 className="text-3xl font-bold text-center text-gray-800 my-80">My Task List!</h1>
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full" onClick={() => { sessionStorage.removeItem("userId"); setUserId(null); }}>Logout</button>
             
             <div className="filters" style={{ marginBottom: "20px", display: "flex", gap: "10px" }}>
-                {/* Search Input */}
-                <input
-                    type="text"
-                    placeholder="Search Title"
-                    value={searchTitle}
-                    onChange={(e) => setSearchTitle(e.target.value)}
-                />
-
-                {/* Status Filter */}
+                <input type="text" placeholder="Search Title" value={searchTitle} onChange={(e) => setSearchTitle(e.target.value)}/>
                 <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
                     <option value="">All Status</option>
                     <option value="TODO">TODO</option>
@@ -177,8 +58,6 @@ function App() {
                     <option value="REVIEW">REVIEW</option>
                     <option value="DONE">DONE</option>
                 </select>
-
-                {/* Priority Filter */}
                 <select value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}>
                     <option value="">All Priorities</option>
                     <option value="LOW">LOW</option>
@@ -189,30 +68,34 @@ function App() {
 
             <TaskList tasks={tasks} onDelete={handleDeleteTask} onUpdate={handleUpdate}/>
             
-            {/* Pagination Controls */}
             <div>
-                <button 
-                    disabled={page === 0}
-                    onClick={() => setPage(prev => prev - 1)}>Previous
-                </button>
+                <button disabled={page === 0} onClick={() => setPage(prev => prev - 1)}>Previous</button>
                 <span>Page {page + 1} of {totalPages}</span>
-                <button
-                    disabled={page >= totalPages - 1}
-                    onClick={() => setPage(prev => prev + 1)}>Next</button>
+                <button disabled={page >= totalPages - 1} onClick={() => setPage(prev => prev + 1)}>Next</button>
+            </div>
+
+            <div style={{ margin: "10px 0" }}>
+                <label>Category: </label>
+                <select value={selectedCategoryId} onChange={(e) => setSelectedCategoryId(e.target.value)}>
+                    <option value="">Select a category</option>
+                    {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
+                </select>
+
+                <div style={{ margin: "20px 0", padding: "10px", border: "1px solid #ccc" }}>
+                    <h3>Create New Category</h3>
+                    <input type="text" placeholder="Category Name" value={newCatName} onChange={(e) => setNewCatName(e.target.value)} />
+                    <button onClick={handleAddCategory}>Add Category</button>
+                </div>
             </div>
 
             <TaskForm
-                taskTitle={newTaskTitle}
-                onTitleChange={setNewTaskTitle}
-                label={newLabel}
-                onLabelChange={setNewLabel}
-                priority={newPriority}
-                onPriorityChange={setNewPriority}
-                onAdd={handleAddTask}
+                taskTitle={newTaskTitle} onTitleChange={setNewTaskTitle}
+                label={newLabel} onLabelChange={setNewLabel}
+                priority={newPriority} onPriorityChange={setNewPriority}
+                onAdd={() => handleAddTask(selectedCategoryId)}
             />
 
             <UserStats userId={userId} tasks={tasks}/>
-
         </div>
     );
 }
