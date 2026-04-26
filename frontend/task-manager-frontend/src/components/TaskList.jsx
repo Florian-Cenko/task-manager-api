@@ -8,20 +8,22 @@ export default function TaskList({tasks, onDelete, onUpdate}){
         return <p>Loading tasks...</p>;
     }
 
-    return (
-        <ul>
-            {tasks.length > 0 ? (
-                tasks.map(task => (
-                    <TaskItem
-                        key={task.id}
-                        task={task}
-                        onDelete={onDelete}
-                        onUpdate={onUpdate}
-                    />
-                ))
-            ) : (
-                <p>No tasks found.</p>
-            )}
-        </ul>
+return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tasks.length > 0 ? (
+                    tasks.map(task => (
+                        //Every Card
+                        <TaskItem
+                            key={task.id}
+                            task={task}
+                            onDelete={onDelete}
+                            onUpdate={onUpdate}
+                        />
+                    ))
+                ) : (
+                    <p>No tasks found.</p>
+                )}
+        </div>
     );
+        
 };

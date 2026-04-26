@@ -12,6 +12,7 @@ export const useTasks = (userId) => {
     const [filterPriority, setFilterPriority] = useState("");
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [dueDate, setDueDate] = useState(""); // Πρόσθεσε αυτή τη γραμμή
 
     // --- Data Fetching Logic ---
     useEffect(() => {
@@ -69,7 +70,7 @@ export const useTasks = (userId) => {
             label: newLabel,
             status: "TODO",
             priority: newPriority,
-            dueDate: new Date().toISOString().split('T')[0],
+            dueDate:dueDate,
             active: true
         };
 
@@ -118,6 +119,7 @@ export const useTasks = (userId) => {
         tasks, newLabel, setNewLabel, newPriority, setNewPriority,
         newTaskTitle, setNewTaskTitle, searchTitle, setSearchTitle,
         filterStatus, setFilterStatus, filterPriority, setFilterPriority,
+        dueDate, setDueDate,
         page, setPage, totalPages, handleAddTask, handleDeleteTask, handleUpdate
     };
 };

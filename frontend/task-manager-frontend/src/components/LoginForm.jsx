@@ -13,13 +13,14 @@ export default function LoginForm({ onLoginSuccess,onSwitchToRegister }) {
 
         try {
             // Attempt to authenticate using the auth service
-            const userId = await login(email, password);
+            const user = await login(email, password);
             
             // Persist the userId in session storage to keep the user logged in
-            sessionStorage.setItem("userId", userId);
+            sessionStorage.setItem("userId", user.id);
+            sessionStorage.setItem("username",user.username);
             
             // Trigger the success callback to update the App component state
-            onLoginSuccess(userId);
+            onLoginSuccess(user.id);
         } catch (err) {
             alert("Login failed! Check your credentials.");
         }

@@ -9,6 +9,8 @@ import com.example.taskmanager.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -51,7 +53,10 @@ public class AuthController {
             return ResponseEntity.status(401).body("User not found");
         }
         if(user.getPassword().equals(loginRequestDTO.getPassword())){
-            return ResponseEntity.ok(user.getId());
+            return ResponseEntity.ok(Map.of(
+                    "id", user.getId(),
+                    "username", user.getUsername()
+            ));
         }
 
 

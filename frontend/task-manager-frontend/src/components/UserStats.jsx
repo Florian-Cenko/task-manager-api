@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { getUserStats } from "../services/taskService";
 
-export default function UserStats({userId, tasks}){
+export default function UserStats({userId, tasks, onStatsLoaded}){
 
     const [stats, setStats] = useState(null);
 
@@ -11,6 +11,7 @@ export default function UserStats({userId, tasks}){
         getUserStats(userId)
         .then(data => {
             setStats(data)
+            onStatsLoaded(data)
         })
 
     },[userId,tasks]);

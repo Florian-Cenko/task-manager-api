@@ -77,6 +77,7 @@ export default function RegisterForm({onRegisterSuccess, onSwitchToLogin}){
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-500 underline"
+                            required
                         >
                             Terms and Conditions
                         </a>
