@@ -6,6 +6,7 @@ import RegisterForm from "./components/RegisterForm";
 import UserStats from "./components/UserStats";
 import { useTasks } from "./hooks/useTasks";
 import { useCategoryManager } from "./hooks/useCategoryManager";
+import  Header  from "./components/Header";
 
 function App() {
     const [showRegister, setShowRegister] = useState(false);
@@ -28,6 +29,7 @@ function App() {
     if (!userId) {
         return (
             <div>
+        
                 {showRegister ? (
                     <RegisterForm 
                         onRegisterSuccess={() => setShowRegister(false)}
@@ -46,6 +48,11 @@ function App() {
     // --- Render ---
     return (
         <div>
+            <Header onLogout={() => {
+                sessionStorage.removeItem("userId");
+                setUserId(null);
+                }} 
+            />
             <h1 className="text-3xl font-bold text-center text-gray-800 my-80">My Task List!</h1>
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full" onClick={() => { sessionStorage.removeItem("userId"); setUserId(null); }}>Logout</button>
             

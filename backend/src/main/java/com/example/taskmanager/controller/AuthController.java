@@ -9,8 +9,6 @@ import com.example.taskmanager.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.parser.Entity;
-
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

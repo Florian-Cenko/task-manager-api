@@ -1,21 +1,27 @@
 const BASE_URL = "http://localhost:8080/api/auth";
 
 
-export const register = async (firstName,lastName,username,email,password) =>{
-
-    const response = await fetch(`${BASE_URL}/register`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
+export const register = async (firstName, lastName, username, email, password) => {
+    const response = await fetch(`${BASE_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
             firstName,
             lastName,
             username,
             email,
-            password})
-        });
+            password
+        })
+    });
 
-        if (!response.ok) throw new Error("Failed to Register");
-        return response.json();
+    const data = await response.json(); 
+
+    if (!response.ok) {
+        console.error("Backend error:", data);
+        throw new Error(data.message || JSON.stringify(data));
+    }
+
+    return data;
 };
 // POST: Authenticate user
 export const login = async (email, password) => {
