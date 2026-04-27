@@ -79,7 +79,34 @@ export const getUserStats = async(userId) =>{
     if (!response.ok) {
         throw new Error("Failed to fetch statistics");
     }
+
+    
     
     // Εδώ το response.json() θα γίνει απευθείας το αντικείμενο StatsResponseDTO!
     return response.json();
+};
+
+export const getTopCategories = (tasks) => {
+    if (!tasks || tasks.length === 0) return [];
+
+    const counts = {};
+
+    tasks.forEach(task => {
+        const name = task.categoryName || task.category?.name;
+        if (!name) return;
+
+        if (!counts[name]) {
+            counts[name] = { name, tasks: 0, completed: 0 };
+        }
+
+        counts[name].tasks++;
+
+        if (task.status === "DONE") {
+            counts[name].completed++;
+        }
+    });
+
+    return Object.values(counts)
+        .sort((a, b) => b.tasks - a.tasks)
+        .slice(0, 2);
 };
