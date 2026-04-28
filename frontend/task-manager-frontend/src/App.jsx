@@ -65,7 +65,7 @@ function App() {
 
     // --- Render ---
     return (
-        <div>
+        <div className="px-6">
             <Header onLogout={() => {
                 sessionStorage.removeItem("userId");
                 setUserId(null);
@@ -160,11 +160,6 @@ function App() {
                         </button>
                     </div>
 
-                    <div style={{ margin: "20px 0", padding: "10px", border: "1px solid #ccc" }}>
-                        <h3>Create New Category</h3>
-                        <input type="text" placeholder="Category Name" value={newCatName} onChange={(e) => setNewCatName(e.target.value)} />
-                        <button onClick={handleAddCategory}>Add Category</button>
-                    </div>
                 </>
             ) : (
                 // --- STATISTICS VIEW ---
@@ -177,6 +172,7 @@ function App() {
             <TaskModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
                 <h2 className="text-xl font-bold mb-6">Create New Task</h2>
                 <TaskForm
+                    userId={userId}
                     taskTitle={newTaskTitle}
                     onTitleChange={setNewTaskTitle}
                     label={newLabel}

@@ -19,13 +19,15 @@ export const useCategoryManager = (userId) => {
 
     const handleAddCategory = async () => {
         if (!newCatName) return;
-        try {
-            await createCategory(userId, { name: newCatName, color: newCatColor });
-            setNewCatName("");
-            refetch(); //For dropdown update
-        } catch (err) {
-            alert("Error creating category: " + err.message);
-        }
+
+        const newCategory = await createCategory(userId, {
+            name: newCatName,
+            color: newCatColor
+        });
+
+        setNewCatName("");
+        refetch();
+        return newCategory; // 👈 σημαντικό
     };
 
     return { 
