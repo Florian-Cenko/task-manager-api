@@ -37,4 +37,6 @@ public class Category {
     @Builder.Default
     private boolean active = true;
 
+    private boolean isSystem = true;
+
 }

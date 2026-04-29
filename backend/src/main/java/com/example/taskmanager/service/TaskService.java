@@ -165,11 +165,12 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TaskResponseDTO> getTasksPaged(Long userId,Status status,Priority priority,String title,Pageable pageable){
+    public Page<TaskResponseDTO> getTasksPaged(Long userId,Status status,Priority priority,String title,Boolean urgent, Pageable pageable){
         Specification<Task> specification = Specification.where(TaskSpecifications.hasUserId(userId))
                 .and(TaskSpecifications.hasStatus(status))
                 .and(TaskSpecifications.hasPriority(priority))
                 .and(TaskSpecifications.titleContains(title))
+                .and(TaskSpecifications.isUrgent(urgent))
                 .and(TaskSpecifications.isActive());
 
         Page<Task> tasks = taskRepository.findAll(specification,pageable);

@@ -73,11 +73,12 @@ public class TaskController {
             @RequestParam(required = false) Status status,
             @RequestParam(required = false) Priority priority,
             @RequestParam(required = false) String title,
+            @RequestParam(required = false) Boolean urgent,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id,desc") String[] sort){
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort[0]).descending());
-        return taskService.getTasksPaged(userId,status,priority,title,pageable);
+        return taskService.getTasksPaged(userId,status,priority,title,urgent,pageable);
     }
 }

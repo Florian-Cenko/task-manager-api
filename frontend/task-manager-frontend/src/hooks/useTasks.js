@@ -10,6 +10,7 @@ export const useTasks = (userId) => {
     const [searchTitle, setSearchTitle] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
     const [filterPriority, setFilterPriority] = useState("");
+    const [showUrgent, setShowUrgent] = useState(false);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [dueDate, setDueDate] = useState(""); // Πρόσθεσε αυτή τη γραμμή
@@ -21,7 +22,7 @@ export const useTasks = (userId) => {
             return; 
         }
 
-        const hasFilters = searchTitle || filterStatus || filterPriority;
+        const hasFilters = searchTitle || filterStatus || filterPriority || showUrgent;
 
         if (!hasFilters) {
             // Fetch all tasks if no filters are applied
@@ -37,7 +38,8 @@ export const useTasks = (userId) => {
                 userId: userId,
                 title: searchTitle,
                 status: filterStatus,
-                priority: filterPriority
+                priority: filterPriority,
+                urgent: showUrgent,
             };
 
             // Remove empty/null fields to send a clean payload
@@ -56,7 +58,7 @@ export const useTasks = (userId) => {
                 })
                 .catch(err => console.error("Error filtering tasks:", err));
         }
-    }, [userId, searchTitle, filterStatus, filterPriority, page]); 
+    }, [userId, searchTitle, filterStatus, filterPriority, showUrgent, page]); 
 
     // --- CRUD Operations ---
 
@@ -118,7 +120,7 @@ export const useTasks = (userId) => {
     return {
         tasks, newLabel, setNewLabel, newPriority, setNewPriority,
         newTaskTitle, setNewTaskTitle, searchTitle, setSearchTitle,
-        filterStatus, setFilterStatus, filterPriority, setFilterPriority,
+        filterStatus, setFilterStatus, filterPriority, setFilterPriority,showUrgent,setShowUrgent,
         dueDate, setDueDate,
         page, setPage, totalPages, handleAddTask, handleDeleteTask, handleUpdate
     };

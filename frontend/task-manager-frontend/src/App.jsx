@@ -24,7 +24,7 @@ function App() {
     const { 
         tasks, newLabel, setNewLabel, newPriority, setNewPriority,
         newTaskTitle, setNewTaskTitle, searchTitle, setSearchTitle,
-        filterStatus, setFilterStatus, filterPriority, setFilterPriority,
+        filterStatus, setFilterStatus, filterPriority, setFilterPriority,showUrgent,setShowUrgent,
         dueDate,setDueDate,
         page, setPage, totalPages, handleAddTask, handleDeleteTask, handleUpdate 
     } = useTasks(userId);
@@ -108,31 +108,55 @@ function App() {
                         New Task
                     </button>
 
-                    <div className="flex w-full">
-                        <div className="relative w-full ml-8 mb-4">
-                            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                <div className="flex flex-wrap items-center gap-4 ml-8 mb-6">
+                    
+                    {/* Search Input - Πιάνει τον διαθέσιμο χώρο */}
+                    <div className="relative flex-1 min-w-[200px]">
+                        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                             <input
                                 type="text"
                                 placeholder="Search Tasks..."
                                 value={searchTitle}
                                 onChange={(e) => setSearchTitle(e.target.value)}
-                                className="w-full pl-10 py-2 border rounded-lg"
+                                className="w-full pl-10 pr-4 py-2 border rounded-lg"
                             />
-                        </div>
-                        <select value={filterStatus} className="w-full px-3 py-2 border rounded-lg ml-5 mb-4" onChange={(e) => setFilterStatus(e.target.value)}>
-                            <option value="">All Statuses</option>
-                            <option value="TODO">TODO</option>
-                            <option value="IN_PROGRESS">IN PROGRESS</option>
-                            <option value="REVIEW">REVIEW</option>
-                            <option value="DONE">DONE</option>
-                        </select>
-                        <select value={filterPriority} className="w-full px-3 py-2 border rounded-lg ml-8 -mr-6 mb-4" onChange={(e) => setFilterPriority(e.target.value)}>
-                            <option value="">All Priorities</option>
-                            <option value="LOW">LOW</option>
-                            <option value="MEDIUM">MEDIUM</option>
-                            <option value="HIGH">HIGH</option>
-                        </select>
                     </div>
+
+                    {/* Selects - Σταθερό πλάτος για να μην αλλάζουν μέγεθος */}
+                    <select value={filterStatus} className="w-40 px-3 py-2 border rounded-lg" onChange={(e) => setFilterStatus(e.target.value)}>
+                        <option value="">All Statuses</option>
+                        <option value="TODO">TODO</option>
+                        <option value="IN_PROGRESS">IN PROGRESS</option>
+                        <option value="REVIEW">REVIEW</option>
+                        <option value="DONE">DONE</option>
+                    </select>
+
+                    <select value={filterPriority} className="w-40 px-3 py-2 border rounded-lg" onChange={(e) => setFilterPriority(e.target.value)}>
+                        <option value="">All Priorities</option>
+                        <option value="LOW">LOW</option>
+                        <option value="MEDIUM">MEDIUM</option>
+                        <option value="HIGH">HIGH</option>
+                    </select>
+
+                    {/* Urgent Filter Checkbox */}
+                    <div className="flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="urgent-filter"
+                                checked={showUrgent}
+                                onChange={(e) => setShowUrgent(e.target.checked)}
+                                className="w-5 h-5 accent-red-500 cursor-pointer"
+                            />
+                            <label htmlFor="urgent-filter" className="text-sm font-medium text-red-600 whitespace-nowrap">
+                                Urgent
+                            </label>
+                        </div>
+                        <span className="text-[10px] text-gray-400 leading-none">
+                            Due within 5 days
+                        </span>
+                    </div>
+                </div>
 
                     <TaskList
                         tasks={tasks}

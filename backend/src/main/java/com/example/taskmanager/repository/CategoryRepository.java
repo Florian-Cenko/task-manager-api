@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category,Long> {
 
-    List<Category> findByUserIdAndActiveTrue(Long userId);
+    List<Category> findByUserIdOrIsSystemTrueAndActiveTrue(Long userId);
 }

@@ -38,7 +38,8 @@ public class CategoryService {
     }
 
     public List<CategoryResponseDTO> allCategoriesForUser(Long userId){
-        List<Category> categories = categoryRepository.findByUserIdAndActiveTrue(userId);
+        // Τώρα τραβάει και του χρήστη και τα defaults
+        List<Category> categories = categoryRepository.findByUserIdOrIsSystemTrueAndActiveTrue(userId);
 
         return categories.stream()
                 .map(categoryMapper::toDTO)
@@ -47,18 +48,23 @@ public class CategoryService {
 
     @Transactional
     public void deleteCategory(Long categoryId, Long userId){
-
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category doesn't exist"));
 
-        if (!category.getUser().getId().equals(userId)) {
+        // 1. Προστασία: Μην αφήσεις να διαγραφούν τα defaults!
+        if (category.isSystem()) {
+            throw new RuntimeException("Cannot delete system categories!");
+        }
+
+        // 2. Προστασία: Μόνο ο ιδιοκτήτης μπορεί να διαγράψει
+        if (category.getUser() == null || !category.getUser().getId().equals(userId)) {
             throw new RuntimeException("You are not authorized to delete this category!");
         }
+
         Category changedCategory = category.toBuilder()
                 .active(false)
                 .build();
 
         categoryRepository.save(changedCategory);
-
     }
 }
