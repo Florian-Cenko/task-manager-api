@@ -1,10 +1,10 @@
 package com.example.taskmanager.controller;
+
 import com.example.taskmanager.dto.CategoryResponseDTO;
-import com.example.taskmanager.model.Category;
-import com.example.taskmanager.repository.CategoryRepository;
 import com.example.taskmanager.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import com.example.taskmanager.model.Category;
 
 import java.util.List;
 
@@ -12,27 +12,28 @@ import java.util.List;
 @RequestMapping("/api/categories")
 public class CategoryController {
 
-    CategoryService categoryService;
-    CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
 
-    public CategoryController(CategoryService categoryService, CategoryRepository categoryRepository){
+    // Dependency Injection μόνο του Service (το Repository πρέπει να καλείται μόνο από το Service)
+    public CategoryController(CategoryService categoryService){
         this.categoryService = categoryService;
-        this.categoryRepository = categoryRepository;
     }
 
+    // Δημιουργία κατηγορίας (θα είναι πάντα isSystem = false)
     @PostMapping("/createCategory")
     public CategoryResponseDTO createCategory(@Valid @RequestBody Category category, @RequestParam Long userId){
-            return categoryService.createCategory(category,userId);
+        return categoryService.createCategory(category, userId);
     }
 
-    @GetMapping("{userId}/allCategories")
+    // Εδώ είναι η βασική αλλαγή: Θα επιστρέφει System + User κατηγορίες
+    @GetMapping("/{userId}/allCategories")
     public List<CategoryResponseDTO> allCategoriesForUser(@PathVariable Long userId){
+        // Το service πρέπει να καλεί την findAllByUserIdIncludingSystem που φτιάξαμε στο Repo
         return categoryService.allCategoriesForUser(userId);
     }
 
     @DeleteMapping("/{categoryId}/user/{userId}")
-    public void softDeleteCategory(@PathVariable Long categoryId,@PathVariable Long userId){
-        categoryService.deleteCategory(categoryId,userId);
+    public void softDeleteCategory(@PathVariable Long categoryId, @PathVariable Long userId){
+        categoryService.deleteCategory(categoryId, userId);
     }
-
 }

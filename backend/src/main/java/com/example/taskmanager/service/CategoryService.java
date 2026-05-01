@@ -31,6 +31,8 @@ public class CategoryService {
 
         Category categoryWithUser = category.toBuilder()
                 .user(user)
+                .isSystem(false)
+                .active(true)
                 .build();
 
         Category savedCategory = categoryRepository.save(categoryWithUser);
@@ -39,7 +41,7 @@ public class CategoryService {
 
     public List<CategoryResponseDTO> allCategoriesForUser(Long userId){
         // Τώρα τραβάει και του χρήστη και τα defaults
-        List<Category> categories = categoryRepository.findByUserIdOrIsSystemTrueAndActiveTrue(userId);
+        List<Category> categories = categoryRepository.findAllByUserIdIncludingSystem(userId);
 
         return categories.stream()
                 .map(categoryMapper::toDTO)

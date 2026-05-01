@@ -27,7 +27,7 @@ public class Category {
     private String color;
 
     @ManyToOne
-    @JoinColumn(name = "user_id",nullable = false)
+    @JoinColumn(name = "user_id",nullable = true)
     private User user;
 
     @OneToMany(mappedBy = "category",cascade = CascadeType.ALL) //Κοίτα, το αφεντικό της σχέσης είναι η μεταβλητή category που βρίσκεται μέσα στο Task.
@@ -37,6 +37,7 @@ public class Category {
     @Builder.Default
     private boolean active = true;
 
-    private boolean isSystem = true;
+    @Builder.Default
+    private boolean isSystem = false;
 
 }

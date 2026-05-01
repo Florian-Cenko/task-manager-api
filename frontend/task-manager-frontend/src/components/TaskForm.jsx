@@ -39,7 +39,7 @@ export default function TaskForm({ userId, taskTitle, onTitleChange, label, onLa
                             setIsCreating(true);
                         }else {
                             setIsCreating(false);
-                            onCategoryChange(e.target.value);
+                            onCategoryChange(Number(e.target.value));
                         }
                     }}
                 >
@@ -61,9 +61,10 @@ export default function TaskForm({ userId, taskTitle, onTitleChange, label, onLa
                         <button 
                             type="button"
                             className="bg-green-500 text-white px-3 py-2 rounded-lg"
-                            onClick={() => {
-                            handleAddCategory();
-                            setIsCreating(false);
+                            onClick={async () => {
+                                const newCat = await handleAddCategory();
+                                setIsCreating(false);
+                                onCategoryChange(newCat.id); // auto select
                             }}
                          >
                              Save

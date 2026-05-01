@@ -1,37 +1,59 @@
 import { useState, useEffect } from "react";
-import { getCategoriesForUser } from "../services/categoryService"; 
-import { createCategory } from "../services/categoryService";
+import * as catService from "../services/categoryService";
 
 export const useCategoryManager = (userId) => {
+
     const [categories, setCategories] = useState([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState("");
     const [newCatName, setNewCatName] = useState("");
-    const [newCatColor, setNewCatColor] = useState("#3498db");
+    const [error, setError] = useState(null);
 
-    const refetch = () => {
-        if (!userId) return;
-        getCategoriesForUser(userId).then(setCategories).catch(err => console.error(err));
+    const loadCategories = async () => {
+        try {
+            const data = await catService.getCategoriesForUser(userId);
+            setCategories(data);
+        } catch (err) {
+            setError(err.message);
+        }
     };
 
     useEffect(() => {
-        refetch();
+        if (userId) loadCategories();
     }, [userId]);
 
     const handleAddCategory = async () => {
-        if (!newCatName) return;
+        try {
+            const newCategory = await catService.createCategory(userId, {
+                name: newCatName,
+                color: "#3498db"
+            });
 
-        const newCategory = await createCategory(userId, {
-            name: newCatName,
-            color: newCatColor
-        });
+            setNewCatName("");
+            await loadCategories();
 
-        setNewCatName("");
-        refetch();
-        return newCategory; // 👈 σημαντικό
+            return newCategory; // 👈 useful
+        } catch (err) {
+            alert(err.message);
+        }
     };
 
-    return { 
-        categories, selectedCategoryId, setSelectedCategoryId, 
-        newCatName, setNewCatName, handleAddCategory 
+    const handleDeleteCategory = async (categoryId) => {
+        try {
+            await catService.deleteCategory(categoryId, userId);
+            await loadCategories();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    return {
+        categories,
+        selectedCategoryId,
+        setSelectedCategoryId,
+        newCatName,
+        setNewCatName,
+        handleAddCategory,
+        handleDeleteCategory,
+        refresh: loadCategories
     };
 };
