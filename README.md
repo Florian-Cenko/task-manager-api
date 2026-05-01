@@ -65,6 +65,33 @@ A robust **Full-Stack Task Management Application** featuring a **Spring Boot** 
    npm install
    npm run dev
    ```
+   
+## 📖 API Documentation
+
+Once the application is running, you can access the interactive Swagger UI to test all endpoints at:
+👉 `http://localhost:8080/swagger-ui/index.html`
+
+### Primary Endpoints:
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/tasks/add` | Create a new task for a user and category |
+| `GET` | `/api/tasks/{userId}/stats` | Get real-time progress & completion stats |
+| `PATCH` | `/api/tasks/{id}/complete` | Mark a specific task as completed |
+| `GET` | `/api/tasks/category/{id}` | Retrieve all tasks within a specific category |
+| `GET` | `/api/tasks` | Get all tasks (returns TaskResponseDTO) |
+
+---
+
+## 🏗️ Architecture
+
+The project follows a clean **Layered Architecture**:
+* **Controller Layer:** Handles HTTP requests and routing.
+* **Service Layer:** Contains business logic, mapping, and statistical calculations.
+* **Repository Layer:** Manages database communication via Spring Data JPA.
+* **DTO Layer:** Decouples the internal database schema from the public API response for better security and performance.
+
+---
 
 
 
