@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -80,5 +81,11 @@ public class TaskController {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort[0]).descending());
         return taskService.getTasksPaged(userId,status,priority,title,urgent,pageable);
+    }
+
+    @PostMapping("/undo")
+    public ResponseEntity<?> undoLastDelete() {
+        taskService.undoLastDelete();
+        return ResponseEntity.ok("Undo successful!");
     }
 }

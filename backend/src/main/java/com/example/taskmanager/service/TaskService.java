@@ -2,6 +2,9 @@ package com.example.taskmanager.service;
 
 import com.example.taskmanager.Priority;
 import com.example.taskmanager.Status;
+import com.example.taskmanager.command.Command;
+import com.example.taskmanager.command.CommandHistory;
+import com.example.taskmanager.command.DeleteTaskCommand;
 import com.example.taskmanager.dto.StatsResponseDTO;
 import com.example.taskmanager.dto.TaskResponseDTO;
 import com.example.taskmanager.event.TaskCreatedEvent;
@@ -41,13 +44,16 @@ public class TaskService {
     private final CategoryRepository categoryRepository;
     private final TaskMapper taskMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
+    // 1. Inject το CommandHistory
+    private final CommandHistory commandHistory;
 
-    public TaskService(UserRepository userRepository, TaskRepository taskRepository, CategoryRepository categoryRepository,TaskMapper taskMapper, ApplicationEventPublisher applicationEventPublisher) {
+    public TaskService(UserRepository userRepository, TaskRepository taskRepository, CategoryRepository categoryRepository,TaskMapper taskMapper, ApplicationEventPublisher applicationEventPublisher,CommandHistory commandHistory) {
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.categoryRepository = categoryRepository;
         this.taskMapper = taskMapper;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.commandHistory = commandHistory;
     }
 
     @Transactional
@@ -112,11 +118,17 @@ public class TaskService {
             throw new RuntimeException("Access Denied");
         }
 
-        // soft delete
-        task.setActive(false);
-
-        taskRepository.save(task);
+        Command command = new DeleteTaskCommand(task, taskRepository);
+        command.execute();
+        commandHistory.push(command);
     }
+        @Transactional
+        public void undoLastDelete() {
+            if (commandHistory.isEmpty()) {
+                throw new RuntimeException("Nothing to undo!");
+            }
+            commandHistory.undo();
+        }
 
     public List<TaskResponseDTO> allTasksForCategory(Long categoryId) {
         boolean categoryExists = categoryRepository.existsById(categoryId);
