@@ -4,6 +4,7 @@ import com.example.taskmanager.Priority;
 import com.example.taskmanager.Status;
 import com.example.taskmanager.dto.StatsResponseDTO;
 import com.example.taskmanager.dto.TaskResponseDTO;
+import com.example.taskmanager.event.TaskCreatedEvent;
 import com.example.taskmanager.mapper.TaskMapper;
 import com.example.taskmanager.model.Category;
 import com.example.taskmanager.model.User;
@@ -14,6 +15,7 @@ import com.example.taskmanager.repository.UserRepository;
 import com.example.taskmanager.security.CheckTaskOwnership;
 import com.example.taskmanager.specifications.TaskSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,12 +39,14 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final CategoryRepository categoryRepository;
     private final TaskMapper taskMapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public TaskService(UserRepository userRepository, TaskRepository taskRepository, CategoryRepository categoryRepository,TaskMapper taskMapper) {
+    public TaskService(UserRepository userRepository, TaskRepository taskRepository, CategoryRepository categoryRepository,TaskMapper taskMapper, ApplicationEventPublisher applicationEventPublisher) {
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.categoryRepository = categoryRepository;
         this.taskMapper = taskMapper;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Transactional
@@ -62,6 +66,8 @@ public class TaskService {
                         .category(category).build();
 
         Task savedTask = taskRepository.save(task);
+        //Observer Design Pattern
+        applicationEventPublisher.publishEvent(new TaskCreatedEvent(task));
         return taskMapper.toDTO(savedTask);
     }
 
