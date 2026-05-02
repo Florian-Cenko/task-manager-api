@@ -1,5 +1,6 @@
 package com.example.taskmanager.service;
 import com.example.taskmanager.dto.CategoryResponseDTO;
+import com.example.taskmanager.factory.CategoryFactory;
 import com.example.taskmanager.mapper.CategoryMapper;
 import com.example.taskmanager.model.Category;
 import com.example.taskmanager.model.User;
@@ -29,11 +30,7 @@ public class CategoryService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User doesn't exist"));
 
-        Category categoryWithUser = category.toBuilder()
-                .user(user)
-                .isSystem(false)
-                .active(true)
-                .build();
+        Category categoryWithUser = CategoryFactory.createCategory(category,user);
 
         Category savedCategory = categoryRepository.save(categoryWithUser);
         return categoryMapper.toDTO(savedCategory);

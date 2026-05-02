@@ -5,7 +5,6 @@ export const useCategoryManager = (userId) => {
 
     const [categories, setCategories] = useState([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState("");
-    const [newCatName, setNewCatName] = useState("");
     const [error, setError] = useState(null);
 
     const loadCategories = async () => {
@@ -21,14 +20,17 @@ export const useCategoryManager = (userId) => {
         if (userId) loadCategories();
     }, [userId]);
 
-    const handleAddCategory = async () => {
+    const handleAddCategory = async (name) => {
+        if (!name.trim()) {  // ← αν είναι κενό
+        alert("Please enter a category name!");
+        return;
+    }
         try {
             const newCategory = await catService.createCategory(userId, {
-                name: newCatName,
+                name: name,
                 color: "#3498db"
             });
 
-            setNewCatName("");
             await loadCategories();
 
             return newCategory; // 👈 useful
@@ -50,8 +52,6 @@ export const useCategoryManager = (userId) => {
         categories,
         selectedCategoryId,
         setSelectedCategoryId,
-        newCatName,
-        setNewCatName,
         handleAddCategory,
         handleDeleteCategory,
         refresh: loadCategories

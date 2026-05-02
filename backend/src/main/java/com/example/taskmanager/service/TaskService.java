@@ -5,6 +5,7 @@ import com.example.taskmanager.Status;
 import com.example.taskmanager.dto.StatsResponseDTO;
 import com.example.taskmanager.dto.TaskResponseDTO;
 import com.example.taskmanager.event.TaskCreatedEvent;
+import com.example.taskmanager.factory.TaskFactory;
 import com.example.taskmanager.mapper.TaskMapper;
 import com.example.taskmanager.model.Category;
 import com.example.taskmanager.model.User;
@@ -56,14 +57,7 @@ public class TaskService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category with this id" + categoryId + "does not exist"));
 
-        Task task = Task.builder()
-                        .title(taskRequest.getTitle())
-                        .status(taskRequest.getStatus())
-                        .dueDate(taskRequest.getDueDate())
-                        .label(taskRequest.getLabel())
-                        .priority(taskRequest.getPriority())
-                        .user(user)
-                        .category(category).build();
+        Task task = TaskFactory.createTask(user,category,taskRequest);
 
         Task savedTask = taskRepository.save(task);
         //Observer Design Pattern
@@ -110,18 +104,17 @@ public class TaskService {
     @Transactional
     @CheckTaskOwnership
     public void deleteTask(Long taskId, Long userId) {
-        // Βρες το task και βεβαιώσου ότι ανήκει στον χρήστη
+
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Το task δεν βρέθηκε!"));
+                .orElseThrow(() -> new RuntimeException("Task not found!"));
 
         if (!task.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Απαγορεύεται η διαγραφή (Access Denied)");
+            throw new RuntimeException("Access Denied");
         }
 
-        // Κάνε το soft delete
+        // soft delete
         task.setActive(false);
 
-        // ΕΝΕΡΓΟΠΟΙΗΣΕ ΤΟ SAVE - Είναι απαραίτητο για να δει το Hibernate την αλλαγή
         taskRepository.save(task);
     }
 
