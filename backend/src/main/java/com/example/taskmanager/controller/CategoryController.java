@@ -3,6 +3,7 @@ package com.example.taskmanager.controller;
 import com.example.taskmanager.dto.CategoryResponseDTO;
 import com.example.taskmanager.service.CategoryService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.taskmanager.model.Category;
 
@@ -35,5 +36,11 @@ public class CategoryController {
     @DeleteMapping("/{categoryId}/user/{userId}")
     public void softDeleteCategory(@PathVariable Long categoryId, @PathVariable Long userId){
         categoryService.deleteCategory(categoryId, userId);
+    }
+
+    @PostMapping("/undo")
+    public ResponseEntity<?> undoLastDelete(){
+        categoryService.undoLastDelete();
+        return  ResponseEntity.ok("Undo was Successful!");
     }
 }

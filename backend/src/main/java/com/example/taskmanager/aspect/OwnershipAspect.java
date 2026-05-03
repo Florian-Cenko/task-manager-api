@@ -24,7 +24,6 @@ public class OwnershipAspect {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
-        // ΣΥΜΠΛΗΡΩΣΕ ΤΟΝ ΚΩΔΙΚΑ ΕΔΩ:
         // 3. Πάρε το task και δες αν το task.getUser().getId() είναι ίσο με το userId που ήρθε.
         if (!task.getUser().getId().equals(userId)){
             // 4. Αν ΔΕΝ είναι ίσα, πέτα RuntimeException("Unauthorized access!").
