@@ -79,8 +79,7 @@ public class TaskController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id,desc") String[] sort){
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort[0]).descending());
-        return taskService.getTasksPaged(userId,status,priority,title,urgent,pageable);
+        return taskService.getTasksPaged(userId,status,priority,title,urgent,page,size,sort);
     }
 
     @PostMapping("/undo")

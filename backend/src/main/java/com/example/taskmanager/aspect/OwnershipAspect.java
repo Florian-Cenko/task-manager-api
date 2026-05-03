@@ -4,12 +4,15 @@ import com.example.taskmanager.model.Task;
 import com.example.taskmanager.repository.TaskRepository;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
 public class OwnershipAspect {
 
+    private static final Logger logger = LoggerFactory.getLogger(OwnershipAspect.class);
     private final TaskRepository taskRepository;
     public OwnershipAspect(TaskRepository taskRepository){
         this.taskRepository = taskRepository;
@@ -29,7 +32,7 @@ public class OwnershipAspect {
             // 4. Αν ΔΕΝ είναι ίσα, πέτα RuntimeException("Unauthorized access!").
             throw new RuntimeException("Access Denied: You don't own this task!");
         }
-        System.out.println("AOP Ownership Validation: Success!");
+        logger.info("AOP Ownership Validation: Success!");
         }
     }
 

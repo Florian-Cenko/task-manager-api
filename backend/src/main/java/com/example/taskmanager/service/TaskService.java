@@ -1,5 +1,5 @@
 package com.example.taskmanager.service;
-
+import org.springframework.data.domain.Pageable;
 import com.example.taskmanager.Priority;
 import com.example.taskmanager.Status;
 import com.example.taskmanager.command.Command;
@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -176,7 +177,10 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TaskResponseDTO> getTasksPaged(Long userId,Status status,Priority priority,String title,Boolean urgent, Pageable pageable){
+    public Page<TaskResponseDTO> getTasksPaged(Long userId,Status status,Priority priority,String title,Boolean urgent,int page, int size, String[] sort){
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort[0]).descending());
+
         Specification<Task> specification = Specification.where(TaskSpecifications.hasUserId(userId))
                 .and(TaskSpecifications.hasStatus(status))
                 .and(TaskSpecifications.hasPriority(priority))

@@ -1,6 +1,7 @@
 package com.example.taskmanager.controller;
 
 import com.example.taskmanager.dto.LoginRequestDTO;
+import com.example.taskmanager.dto.LoginResponseDTO;
 import com.example.taskmanager.dto.UserRegistrationDTO;
 import com.example.taskmanager.dto.UserResponseDTO;
 import com.example.taskmanager.model.User;
@@ -15,11 +16,9 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private UserRepository userRepository;
-    private UserService userService;
+    private final UserService userService;
 
-    public AuthController(UserRepository userRepository, UserService userService) {
-        this.userRepository = userRepository;
+    public AuthController(UserService userService) {
         this.userService = userService;
     }
 
@@ -45,21 +44,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequestDTO){
-
-        User user = userRepository.findByEmail(loginRequestDTO.getEmail());
-
-        if(user == null) {
-            return ResponseEntity.status(401).body("User not found");
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequestDTO) {
+        try {
+            LoginResponseDTO result = userService.login(loginRequestDTO);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
         }
-        if(user.getPassword().equals(loginRequestDTO.getPassword())){
-            return ResponseEntity.ok(Map.of(
-                    "id", user.getId(),
-                    "username", user.getUsername()
-            ));
-        }
-
-
-        return ResponseEntity.status(401).body("Invalid password");
     }
 }
